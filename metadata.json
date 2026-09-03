@@ -1,0 +1,6 @@
+{
+  "name": "Millionaire Game Suite",
+  "description": "Who Wants to Be a Millionaire interactive game interface with host controller, player view, and video wall.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

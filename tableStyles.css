@@ -1,0 +1,210 @@
+table {
+	margin:auto;
+	position:absolute;
+	padding:0px;
+}
+
+.moneyTreeTable {
+	line-height: 0.967;
+	font-size: 0;
+	left:74px;
+	bottom:117px;
+	border-collapse:collapse;
+	scale:100% 100%;
+	transform-origin:left;
+}
+.moneyTree1Table {
+	line-height: 1.477;
+	font-size: 0;
+	left:62px;
+	bottom:42px;
+	border-collapse:collapse;
+	scale:100% 100%;
+	transform-origin:left;
+}
+
+.moneyTreeAmountTd {
+	font-family:'Copperplate31bc';
+	font-size:38pt;
+	color:#FEAD13;
+	letter-spacing:0px;
+	text-shadow:2px 2px 0px black;
+	letter-spacing:0px;
+	padding-left:0px;
+	padding-top:0px;
+	width:640px;
+	background-size:cover;
+	background-position-x:-775px;
+	background-repeat:no-repeat;
+}
+
+.moneyTreeAmountWhiteTd {
+	font-family:'Copperplate31bc';
+	font-size:38pt;
+	color:#FFFFFF;
+	letter-spacing:0px;
+	text-shadow:2px 2px 0px black;
+	letter-spacing:0px;
+	padding-left:0px;
+	padding-top:0px;
+	width:640px;
+	background-size:cover;
+	background-position-x:-775px;
+	background-repeat:no-repeat;
+}
+
+.moneyTreeDiagonalTd {
+	vertical-align:middle;
+	min-width:47px;
+	background-position:center;
+	background-size:cover;
+	background-repeat:no-repeat;
+}
+
+.moneyTreeLevelTd {
+	font-family:'Copperplate31bc';
+	font-size:38pt;
+	color:#FEAD13;
+	letter-spacing:-7px;
+	text-shadow:2px 2px 0px black;
+	padding-left:21px;
+	padding-top:0px;
+	text-align:right;
+	background-size:cover;
+}
+
+.moneyTreeLevelWhiteTd {
+	font-family:'Copperplate31bc';
+	font-size:38pt;
+	color:#FFFFFF;
+	letter-spacing:-7px;
+	text-shadow:2px 2px 0px black;
+	padding-left:21px;
+    padding-top:0px;
+	text-align:right;
+	background-size:cover;
+}
+
+.questionTable {
+	width:1500px;
+	max-width:1500px;
+	height:100%;
+	bottom:0px;
+	top:0px;
+	margin-left:210px;
+}
+
+.questionTd {
+	vertical-align:middle;
+	font-size:29pt;
+	font-family:Verdana;
+	color:#FFFFFF;
+	text-shadow:2px 2px 0px black;
+	letter-spacing:-1px;
+	line-height: 1.2;
+	text-align:center;
+	padding-bottom:4px;
+}
+
+.moneyTreeAmount1Td {
+	font-family:CopperplateBold;
+	font-size:28pt;
+	color:#FEAD13;
+	font-weight:bold;
+	letter-spacing:1px;
+		text-shadow:2px 2px 5px black, -1px -1px 0px black, 0px -1px 0px black, 1px -1px 0px black, -1px 0px 0px black, 1px 0px 0px black, -1px 1px 0px black, 0px 1px 0px black, 1px 1px 0px black;
+	padding-left:0px;
+	padding-top:3px;
+	width:640px;
+	background-size:cover;
+	background-position-x:-870px;
+	background-repeat:no-repeat;
+}
+
+.moneyTreeAmountWhite1Td {
+	font-family:CopperplateBold;
+	font-size:28pt;
+	color:#FFFFFF;
+	font-weight:bold;
+	letter-spacing:1px;
+		text-shadow:2px 2px 5px black, -1px -1px 0px black, 0px -1px 0px black, 1px -1px 0px black, -1px 0px 0px black, 1px 0px 0px black, -1px 1px 0px black, 0px 1px 0px black, 1px 1px 0px black;
+	padding-left:0px;
+	padding-top:3px;
+	width:640px;
+	background-size:cover;
+	background-position-x:-870px;
+	background-repeat:no-repeat;
+}
+
+.moneyTreeDiagonal1Td {
+	vertical-align:middle;
+	min-width:36px;
+	background-size:cover;
+	background-position-x:-34px;
+	background-repeat:no-repeat;
+}
+
+.moneyTreeLevel1Td {
+	font-family:CopperplateBold;
+	font-size:28pt;
+	color:#FEAD13;
+	font-weight:bold;
+	letter-spacing:-6px;
+		text-shadow:2px 2px 5px black, -1px -1px 0px black, 0px -1px 0px black, 1px -1px 0px black, -1px 0px 0px black, 1px 0px 0px black, -1px 1px 0px black, 0px 1px 0px black, 1px 1px 0px black;
+	padding-left:40px;
+	padding-top:3px;
+	text-align:center;
+	background-size:cover;
+}
+
+.moneyTreeLevelWhite1Td {
+	font-family:CopperplateBold;
+	font-size:28pt;
+	color:#FFFFFF;
+	font-weight:bold;
+	letter-spacing:-6px;
+		text-shadow:2px 2px 5px black, -1px -1px 0px black, 0px -1px 0px black, 1px -1px 0px black, -1px 0px 0px black, 1px 0px 0px black, -1px 1px 0px black, 0px 1px 0px black, 1px 1px 0px black;
+	padding-left:40px;
+    padding-top:3px;
+	text-align:center;
+	background-size:cover;
+}
+
+.infoTable {
+	width:1320px;
+	max-width:1320px;
+	height:100%;
+	bottom:120px;
+	left: -145px;
+	top:0px;
+	margin-left:150px;
+}
+
+.infoTd {
+	vertical-align:middle;
+	font-size:28pt;
+	font-family:Verdana;
+	color:#FFFFFF;
+	letter-spacing:-1px;
+	line-height: 1.4;
+	text-align:left;
+}
+
+.hostNoteTable {
+	width:1320px;
+	max-width:1320px;
+	height:100%;
+	top:30px;
+	left: -145px;
+	margin-left:150px;
+}
+
+.hostNoteTd {
+	vertical-align:top;
+	font-size:28pt;
+	font-family:Verdana;
+	color:#FFFFFF;
+	letter-spacing:-1px;
+	line-height: 1.4;
+	text-align:left;
+}

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Variables Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e1a; --panel:#121a2e; --panel-2:#0e1526; --line:#232e48;
+    --gold:#e8b84b; --gold-dim:#8a7133; --ink:#f2efe4; --ink-dim:#9aa3bd;
+    --green:#3ecf8e; --red:#e2606b; --purple:#a98ce8; --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(1200px 600px at 15% -10%, #16234a 0%, transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, #1a1440 0%, transparent 55%), var(--bg);
+    color:var(--ink); font-family:'Inter',system-ui,sans-serif; min-height:100vh; padding-bottom:80px;
+  }
+  ::selection{background:var(--gold);color:#1a1400;}
+  code, .mono{font-family:'JetBrains Mono',monospace;}
+
+  header{
+    position:sticky; top:0; z-index:40; background:rgba(10,14,26,0.92); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line); padding:14px 22px;
+  }
+  .header-row{display:flex; align-items:center; gap:14px; flex-wrap:wrap; max-width:1100px; margin:0 auto;}
+  .brand{display:flex; align-items:center; gap:10px; margin-right:auto;}
+  .brand .diamond{width:14px;height:14px;background:var(--gold); transform:rotate(45deg); box-shadow:0 0 12px rgba(232,184,75,0.6);}
+  .brand h1{font-family:'Bebas Neue',sans-serif; letter-spacing:1.5px; font-size:24px; margin:0; color:var(--ink);}
+  .status-line{font-size:12px; color:var(--ink-dim); margin-top:2px; display:flex; align-items:center; gap:6px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-dim);display:inline-block;}
+  .dot.unsaved{background:var(--red); box-shadow:0 0 6px var(--red);}
+  .dot.saved{background:var(--green); box-shadow:0 0 6px var(--green);}
+
+  .btn{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:13px; padding:9px 14px; border-radius:8px;
+    border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px; transition:border-color .15s, transform .1s, background .15s;
+    white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--gold-dim); background:#16203a;}
+  .btn:active{transform:scale(0.97);}
+  .btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .btn.gold{background:linear-gradient(180deg,#f0c568,#d9a838); color:#241a02; border:none;}
+  .btn.gold:hover{filter:brightness(1.08);}
+  .btn.small{padding:5px 10px; font-size:11.5px; border-radius:6px;}
+
+  .banner{
+    max-width:1100px; margin:14px auto 0; padding:10px 16px; background:#241a08;
+    border:1px solid #4a341a; border-radius:8px; font-size:12.5px; color:#e4c485; line-height:1.5;
+  }
+  .banner code{background:#0007; padding:1px 5px; border-radius:4px;}
+  .banner.ok{background:#0e2a1f; border-color:#1e4a35; color:#a7e8cb;}
+
+  main{max-width:1100px; margin:18px auto; padding:0 22px;}
+
+  .empty-state{text-align:center; padding:70px 20px; color:var(--ink-dim);}
+  .empty-state .diamond-big{width:34px;height:34px;background:var(--gold); margin:0 auto 16px; transform:rotate(45deg); box-shadow:0 0 20px rgba(232,184,75,0.4);}
+
+  .group{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); margin-bottom:16px; overflow:hidden;}
+  .group-head{padding:14px 18px; background:var(--panel-2); border-bottom:1px solid var(--line);}
+  .group-head h2{font-family:'Bebas Neue',sans-serif; letter-spacing:1px; font-size:19px; margin:0; color:var(--gold);}
+  .group-note{font-size:12px; color:var(--ink-dim); margin-top:6px; line-height:1.5;}
+  .group-body{padding:16px 18px;}
+
+  .vrow{
+    display:grid; grid-template-columns:280px 1fr; gap:16px; align-items:center;
+    padding:10px 0; border-bottom:1px solid #1b2440;
+  }
+  .vrow:last-child{border-bottom:none;}
+  @media(max-width:640px){.vrow{grid-template-columns:1fr;}}
+  .vrow label{font-size:13px; color:var(--ink); font-weight:500;}
+  .vrow .varname{display:block; font-size:10.5px; color:var(--ink-dim); margin-top:2px;}
+
+  input[type=text], input[type=number], textarea, select{
+    width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
+    padding:8px 10px; border-radius:7px; font-size:13.5px; font-family:'Inter',sans-serif;
+  }
+  input[type=text]:focus, input[type=number]:focus, textarea:focus, select:focus{outline:none; border-color:var(--gold-dim);}
+
+  .switch{position:relative; display:inline-block; width:42px; height:24px;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{position:absolute; cursor:pointer; inset:0; background:#2a3557; border-radius:24px; transition:.15s;}
+  .slider::before{content:""; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:var(--ink-dim); border-radius:50%; transition:.15s;}
+  input:checked + .slider{background:#2a6b4f;}
+  input:checked + .slider::before{background:var(--green); transform:translateX(18px);}
+
+  .arr-list{display:flex; flex-direction:column; gap:6px;}
+  .arr-item{display:flex; align-items:center; gap:8px;}
+  .arr-item .idx{
+    width:78px; flex-shrink:0; font-size:11px; color:var(--ink-dim); font-family:'JetBrains Mono',monospace;
+  }
+  .arr-item .rm{
+    background:transparent; border:none; color:var(--ink-dim); cursor:pointer; font-size:15px; padding:4px 8px; border-radius:5px; flex-shrink:0;
+  }
+  .arr-item .rm:hover{color:var(--red); background:#2a1420;}
+  .arr-add{margin-top:8px;}
+
+  .exception-tag{
+    display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    background:#3a2650; color:var(--purple); padding:3px 8px; border-radius:5px; margin-left:8px;
+  }
+
+  details.preview-out{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); margin:20px 0; padding:0;}
+  details.preview-out summary{
+    cursor:pointer; padding:14px 18px; font-family:'Bebas Neue',sans-serif; letter-spacing:1px; font-size:16px;
+    color:var(--gold); list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  details.preview-out summary::-webkit-details-marker{display:none;}
+  details.preview-out summary::before{content:"▸"; transition:transform .15s; font-family:'Inter',sans-serif;}
+  details.preview-out[open] summary::before{transform:rotate(90deg);}
+  details.preview-out textarea{
+    width:calc(100% - 36px); margin:0 18px 18px; font-family:'JetBrains Mono',monospace; font-size:11.5px;
+    min-height:300px; background:#080c18;
+  }
+
+  #toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--panel); border:1px solid var(--gold-dim); color:var(--ink); padding:12px 20px;
+    border-radius:8px; font-size:13px; font-weight:600; box-shadow:0 8px 30px rgba(0,0,0,0.5);
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:100;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  #toast.err{border-color:#4a2530; color:#f5b8c0;}
+  .visually-hidden{position:absolute; width:1px;height:1px; overflow:hidden; clip:rect(0,0,0,0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="brand">
+      <div class="diamond"></div>
+      <div>
+        <h1>GAME VARIABLES</h1>
+        <div class="status-line"><span class="dot" id="statusDot"></span><span id="statusText">No file opened yet</span></div>
+      </div>
+    </div>
+    <button class="btn" id="openFileBtn">📄 Open gameVariables.js</button>
+    <button class="btn" id="openManualBtn">📁 Load Manually</button>
+    <button class="btn" id="revertBtn" disabled>↺ Revert</button>
+    <button class="btn gold" id="saveBtn" disabled>💾 Save</button>
+    <button class="btn" id="exportBtn" disabled>⇩ Export</button>
+  </div>
+</header>
+
+<main>
+  <div class="banner" id="fsaBanner"></div>
+
+  <div id="emptyState" class="empty-state">
+    <div class="diamond-big"></div>
+    <p style="font-family:'Bebas Neue',sans-serif; letter-spacing:1px; font-size:20px; margin:0 0 8px;">NO FILE LOADED</p>
+    <p style="font-size:13px; max-width:460px; margin:0 auto; line-height:1.7;">
+      Open your <code>gameVariables.js</code> file to tune lifeline settings, prize text, number formatting, top-prize rules, tree scaling, and prize amounts ladder presets.
+    </p>
+  </div>
+
+  <div id="formRoot" style="display:none;"></div>
+
+  <details class="preview-out" id="previewDetails" style="display:none;">
+    <summary>Preview resulting file</summary>
+    <textarea readonly id="previewText"></textarea>
+  </details>
+</main>
+
+<div id="toast"></div>
+<input type="file" id="fileInputManual" accept=".js" class="visually-hidden">
+
+<script>
+(function(){
+  'use strict';
+
+  // ---------------------------------------------------------------
+  // Presets Configuration
+  // ---------------------------------------------------------------
+  const PRIZE_PRESETS = {
+    uk: {
+      amounts: [100, 200, 300, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000],
+      locale: "en-GB",
+      currency: "GBP"
+    },
+    us: {
+      amounts: [500, 1000, 2000, 3000, 5000, 7500, 10000, 15000, 25000, 50000, 100000, 250000, 500000, 750000, 1000000],
+      locale: "en-US",
+      currency: "USD"
+    },
+    vn_2022_2026: {
+      amounts: [200000, 400000, 600000, 1000000, 2000000, 3000000, 6000000, 10000000, 14000000, 22000000, 30000000, 40000000, 60000000, 85000000, 250000000],
+      locale: "vi-VN",
+      currency: "VND"
+    },
+    vn_latest: {
+      amounts: [200000, 400000, 600000, 1000000, 2000000, 3000000, 6000000, 10000000, 15000000, 22000000, 30000000, 40000000, 80000000, 150000000, 400000000],
+      locale: "vi-VN",
+      currency: "VND"
+    }
+  };
+
+  const NUMBERING_SYSTEMS = [
+    "latn", "adlm", "ahom", "arab", "arabext", "bali", "beng", "bhks", "brah", "cakm", 
+    "cham", "deva", "diak", "fullwide", "gong", "gonm", "gujr", "guru", "hanidec", 
+    "hmng", "hmnp", "java", "kali", "khmr", "knda", "lana", "lanatham", "laoo", 
+    "lepc", "limb", "mathbold", "mathdbl", "mathmono", "mathsanb", "mathsans", "mlym", 
+    "modi", "mong", "mroo", "mtei", "mymr", "mymrshan", "mymrtlng", "newa", "nkoo", 
+    "olck", "orya", "osma", "rohg", "saur", "segment", "shrd", "sind", "sinh", 
+    "sora", "sund", "takr", "talu", "tamldec", "telu", "thai", "tibt", "tirh", "vaii", "wara", "wcho"
+  ];
+
+  // ---------------------------------------------------------------
+  // Config: editable variables
+  // ---------------------------------------------------------------
+  const GROUPS = [
+    {
+      title:'🎮 Lifeline & Start Settings',
+      vars:[
+        {name:'IsPAFLifeLineUsed', type:'bool', label:'Phone-a-Friend already used at game start'},
+        {name:'IsFFLifeLineUsed', type:'bool', label:'50:50 already used at game start'},
+        {name:'IsATALifeLineUsed', type:'bool', label:'Ask the Audience already used at game start'},
+        {name:'IsSTQLifeLineUsed', type:'bool', label:'Switch the Question already used at game start'},
+        {name:'IsSTQLifeLineActiveAtStart', type:'bool', label:'Switch the Question active at game start'},
+        {name:'StartingQuestionLevel', type:'number', label:'Starting question level'},
+      ]
+    },
+    {
+      title:'🏆 Contestant & Prize Text',
+      vars:[
+        {name:'TotalPrizeText', type:'string', label:'"Total prize" label'},
+        {name:'MillionaireText', type:'string', label:'"Millionaire" label'},
+        {name:'ContestantFirstName', type:'string', label:'Contestant first name'},
+        {name:'ContestantLastName', type:'string', label:'Contestant last name'},
+        {name:'ContestantLocation', type:'string', label:'Contestant location'},
+        {name:'BreakText', type:'string', label:'Commercial break label'},
+      ]
+    },
+    {
+      title:'🏷️ HUD Prefix / Suffix Labels',
+      vars:[
+        {name:'RightAnswerPrizePrefixText', type:'string', label:'Correct-answer prize — prefix'},
+        {name:'RightAnswerPrizeSuffixText', type:'string', label:'Correct-answer prize — suffix'},
+        {name:'WalkAwayPrizePrefixText', type:'string', label:'Walk-away prize — prefix'},
+        {name:'WalkAwayPrizeSuffixText', type:'string', label:'Walk-away prize — suffix'},
+        {name:'PrizeAmountWrongPrefixText', type:'string', label:'Prize-if-wrong — prefix'},
+        {name:'PrizeAmountWrongSuffixText', type:'string', label:'Prize-if-wrong — suffix'},
+        {name:'PrizeAfterWrongPrefixText', type:'string', label:'Prize-after-wrong — prefix'},
+        {name:'PrizeAfterWrongSuffixText', type:'string', label:'Prize-after-wrong — suffix'},
+        {name:'QuestionsLeftPrefixText', type:'string', label:'Questions-left — prefix'},
+        {name:'QuestionsLeftSuffixText', type:'string', label:'Questions-left — suffix'},
+      ]
+    },
+    {
+      title:'🔢 Number Format Settings',
+      vars:[
+        {name:'LocaleCode', type:'string', label:'Locale code (e.g. vi-VN)'},
+        {name:'ReplaceCharacterBefore', type:'string', label:'Replace this character…'},
+        {name:'ReplaceCharacterAfter', type:'string', label:'…with this character'},
+        {name:'NumberPrefix', type:'string', label:'Prefix before amounts'},
+        {name:'NumberSuffix', type:'string', label:'Suffix after amounts'},
+        {name:'LevelNumberingSystem', type:'string', label:'Numbering system — level'},
+        {name:'PaFNumberingSystem', type:'string', label:'Numbering system — Phone a Friend'},
+        {name:'AtANumberingSystem', type:'string', label:'Numbering system — Ask the Audience'},
+        {name:'FormatOptions', type:'object-formatOptions', label:'Intl Format Options'},
+      ]
+    },
+    {
+      title:'💎 Top Prize & Zeronaire',
+      vars:[
+        {name:'UseTopPrizeText', type:'bool', label:'Show top prize amounts as text'},
+        {name:'TopPrizeQuestionNumber', type:'number', label:'Level above which text is used'},
+        {name:'TopPrizeText', type:'array-string', label:'Top prize text (per level)', levelLabels:true},
+        {name:'UseTopPrizeLevelStrapText', type:'bool', label:'Show level-strap top prize as text'},
+        {name:'TopPrizeLevelStrapQuestionNumber', type:'number', label:'Level above which strap text is used'},
+        {name:'TopPrizeLevelStrapText', type:'array-string', label:'Level-strap top prize text (per level)', levelLabels:true},
+        {name:'UseZeronaireText', type:'bool', label:'Show "walked away with nothing" as text'},
+        {name:'ZeronaireText', type:'string', label:'Zeronaire text'},
+      ]
+    },
+    {
+      title:'🌳 Money Tree Display',
+      vars:[
+        {name:'TreeScale', type:'number', label:'Tree scale (%)'},
+        {name:'TreeBackgroundPosition', type:'number', label:'Tree background X position (px)'},
+        {name:'WinTextScale', type:'number', label:'Win text scale (%)'},
+        {name:'TPMTextScale', type:'number', label:'Total prize money text scale (%)'},
+      ]
+    },
+    {
+      title:'⚙️ Gameplay Settings',
+      note:'These settings live inside the main runtime variable block.',
+      vars:[
+        {name:'STQUnlockedLevel', type:'number', label:'Level at which "Switch the Question" unlocks', exception:true},
+        {name:'PrizeAmounts', type:'array-number', label:'Prize ladder amounts', levelLabels:true, exception:true},
+      ]
+    },
+  ];
+
+  const ALL_VARS = GROUPS.flatMap(g=>g.vars);
+
+  // ---------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------
+  let originalText = null;
+  let values = {};
+  let fileHandle = null;
+  let hasFSA = 'showOpenFilePicker' in window && location.protocol !== 'file:';
+  let dirty = false;
+
+  const $ = sel => document.querySelector(sel);
+  const formRoot = $('#formRoot');
+  const emptyState = $('#emptyState');
+  const previewDetails = $('#previewDetails');
+  const previewText = $('#previewText');
+
+  function toast(msg, isErr){
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.toggle('err', !!isErr);
+    t.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>t.classList.remove('show'), 3200);
+  }
+  function setDirty(v){
+    dirty = v;
+    $('#statusDot').classList.toggle('unsaved', v);
+    $('#statusDot').classList.toggle('saved', !v && originalText!==null);
+    $('#saveBtn').disabled = !(dirty);
+    $('#revertBtn').disabled = !(dirty && originalText!==null);
+  }
+  window.addEventListener('beforeunload', e=>{ if(dirty){ e.preventDefault(); e.returnValue=''; } });
+
+  // ---------------------------------------------------------------
+  // Extraction & Parsing
+  // ---------------------------------------------------------------
+  function extractAssignment(text, name){
+    const re = new RegExp('gameVariables\\.' + name + '\\s*=\\s*');
+    const m = re.exec(text);
+    if(!m) return null;
+    const valueStart = m.index + m[0].length;
+    let i = valueStart, depth = 0, inStr = null;
+    while(i < text.length){
+      const ch = text[i];
+      if(inStr){
+        if(ch === '\\'){ i += 2; continue; }
+        if(ch === inStr) inStr = null;
+        i++; continue;
+      }
+      if(ch === '"' || ch === "'"){ inStr = ch; i++; continue; }
+      if(ch === '{' || ch === '['){ depth++; i++; continue; }
+      if(ch === '}' || ch === ']'){ depth--; i++; continue; }
+      if(ch === ';' && depth === 0) break;
+      i++;
+    }
+    return { valueText: text.slice(valueStart, i), valueStart, valueEnd: i };
+  }
+
+  function evalLiteral(text){
+    return Function('"use strict"; return (' + text + ');')();
+  }
+
+  function parseAll(text){
+    values = {};
+    ALL_VARS.forEach(v=>{
+      const info = extractAssignment(text, v.name);
+      if(!info){ 
+        values[v.name] = v.type==='object-formatOptions' ? {} : (v.type==='bool' ? false : v.type==='number' ? 0 : v.type.startsWith('array') ? [] : ''); 
+        return; 
+      }
+      try{ 
+        values[v.name] = evalLiteral(info.valueText); 
+      } catch(e){ 
+        values[v.name] = v.type==='object-formatOptions' ? {} : (v.type==='bool' ? false : v.type==='number' ? 0 : v.type.startsWith('array') ? [] : ''); 
+      }
+    });
+  }
+
+  function formatJSObject(obj, indent = '    ') {
+    const entries = Object.entries(obj).map(([k, val]) => {
+      let formattedVal = typeof val === 'string' ? `"${val}"` : String(val);
+      return `${indent}    ${k}: ${formattedVal}`;
+    });
+    return `{\n${entries.join(',\n')}\n${indent}}`;
+  }
+
+  function serializeValue(v){
+    if(v.type === 'bool') return values[v.name] ? 'true' : 'false';
+    if(v.type === 'number') return String(values[v.name]);
+    if(v.type === 'string') return JSON.stringify(values[v.name]);
+    if(v.type === 'array-string') return '[' + values[v.name].map(x=>JSON.stringify(x)).join(',') + ']';
+    if(v.type === 'array-number') return '[' + values[v.name].map(x=>String(x)).join(',') + ']';
+    if(v.type === 'object-formatOptions') return formatJSObject(values[v.name]);
+    return values[v.name];
+  }
+
+  function buildOutputText(){
+    let working = originalText;
+    ALL_VARS.forEach(v=>{
+      const info = extractAssignment(working, v.name);
+      if(!info) return;
+      const newVal = serializeValue(v);
+      working = working.slice(0, info.valueStart) + newVal + working.slice(info.valueEnd);
+    });
+    return working;
+  }
+
+  // ---------------------------------------------------------------
+  // Rendering
+  // ---------------------------------------------------------------
+  function arrRowLabel(v, i){
+    if(v.name === 'PrizeAmounts') return i < 15 ? ('Level ' + (i+1)) : ('Extra (index ' + i + ')');
+    if(v.levelLabels) return 'Level ' + (i+1);
+    return 'Index ' + i;
+  }
+
+  function render(){
+    formRoot.innerHTML = '';
+    GROUPS.forEach(group=>{
+      const g = document.createElement('div');
+      g.className = 'group';
+      const head = document.createElement('div');
+      head.className = 'group-head';
+      head.innerHTML = `<h2>${group.title}</h2>` + (group.note ? `<div class="group-note">${group.note}</div>` : '');
+      g.appendChild(head);
+
+      const body = document.createElement('div');
+      body.className = 'group-body';
+
+      group.vars.forEach(v=>{
+        const row = document.createElement('div');
+        row.className = 'vrow';
+        row.dataset.name = v.name;
+
+        const labelWrap = document.createElement('div');
+        labelWrap.innerHTML = `<label>${v.label}${v.exception?'<span class="exception-tag">exception</span>':''}</label><span class="varname mono">gameVariables.${v.name}</span>`;
+        row.appendChild(labelWrap);
+
+        const control = document.createElement('div');
+
+        if(v.type === 'bool'){
+          control.innerHTML = `
+            <label class="switch">
+              <input type="checkbox" data-name="${v.name}" ${values[v.name] ? 'checked':''}>
+              <span class="slider"></span>
+            </label>`;
+        } else if(v.type === 'number'){
+          control.innerHTML = `<input type="number" step="any" data-name="${v.name}" value="${values[v.name]}">`;
+        } else if(v.type === 'string'){
+          control.innerHTML = `<input type="text" data-name="${v.name}" value="${attrEsc(values[v.name])}">`;
+        } else if(v.type === 'object-formatOptions'){
+          control.appendChild(buildFormatOptionsEditor(v.name));
+        } else if(v.type === 'array-string' || v.type === 'array-number'){
+          control.appendChild(buildArrayEditor(v));
+        }
+        row.appendChild(control);
+        body.appendChild(row);
+      });
+
+      g.appendChild(body);
+      formRoot.appendChild(g);
+    });
+  }
+
+  function buildFormatOptionsEditor(name){
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:grid; grid-template-columns:1fr 1fr; gap:12px; background:var(--panel-2); padding:14px; border-radius:8px; border:1px solid var(--line);';
+    
+    const obj = values[name] || {};
+    const style = obj.style || 'decimal';
+    const currency = obj.currency || 'USD';
+    const currencyDisplay = obj.currencyDisplay || 'symbol';
+    const numberingSystem = obj.numberingSystem || 'latn';
+    const minDigits = obj.minimumFractionDigits !== undefined ? obj.minimumFractionDigits : 0;
+
+    wrap.innerHTML = `
+      <div>
+        <label style="font-size:11px; color:var(--ink-dim); display:block; margin-bottom:4px;">Style</label>
+        <select id="fo_style">
+          <option value="decimal" ${style === 'decimal' ? 'selected':''}>decimal (plain numbers)</option>
+          <option value="currency" ${style === 'currency' ? 'selected':''}>currency (formatted currency)</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size:11px; color:var(--ink-dim); display:block; margin-bottom:4px;">Currency Code (ISO 4217)</label>
+        <input type="text" id="fo_currency" value="${attrEsc(currency)}" placeholder="USD, VND, GBP, EUR...">
+      </div>
+
+      <div>
+        <label style="font-size:11px; color:var(--ink-dim); display:block; margin-bottom:4px;">Currency Display</label>
+        <select id="fo_currencyDisplay">
+          <option value="symbol" ${currencyDisplay === 'symbol' ? 'selected':''}>symbol ($)</option>
+          <option value="narrowSymbol" ${currencyDisplay === 'narrowSymbol' ? 'selected':''}>narrowSymbol ($)</option>
+          <option value="code" ${currencyDisplay === 'code' ? 'selected':''}>code (USD)</option>
+          <option value="name" ${currencyDisplay === 'name' ? 'selected':''}>name (US Dollars)</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size:11px; color:var(--ink-dim); display:block; margin-bottom:4px;">Numbering System</label>
+        <select id="fo_numberingSystem">
+          ${NUMBERING_SYSTEMS.map(sys => `<option value="${sys}" ${numberingSystem === sys ? 'selected':''}>${sys}</option>`).join('')}
+        </select>
+      </div>
+
+      <div style="grid-column: span 2;">
+        <label style="font-size:11px; color:var(--ink-dim); display:block; margin-bottom:4px;">Minimum Fraction Digits</label>
+        <input type="number" id="fo_minDigits" min="0" max="20" value="${minDigits}">
+      </div>
+    `;
+
+    wrap.addEventListener('input', updateFormatOptions);
+    wrap.addEventListener('change', updateFormatOptions);
+
+    function updateFormatOptions(){
+      values[name] = {
+        style: wrap.querySelector('#fo_style').value,
+        currency: wrap.querySelector('#fo_currency').value.toUpperCase().trim(),
+        currencyDisplay: wrap.querySelector('#fo_currencyDisplay').value,
+        numberingSystem: wrap.querySelector('#fo_numberingSystem').value,
+        minimumFractionDigits: parseInt(wrap.querySelector('#fo_minDigits').value, 10) || 0
+      };
+      setDirty(true);
+      refreshPreview();
+    }
+
+    return wrap;
+  }
+
+  function buildArrayEditor(v){
+    const wrap = document.createElement('div');
+    wrap.className = 'arr-list';
+    wrap.dataset.name = v.name;
+
+    function renderRows(){
+      wrap.innerHTML = '';
+
+      if(v.name === 'PrizeAmounts'){
+        const presetWrap = document.createElement('div');
+        presetWrap.style.cssText = 'margin-bottom:12px; padding:12px; background:#18233c; border-radius:7px; border:1px solid var(--line);';
+        presetWrap.innerHTML = `
+          <label style="font-size:12px; font-weight:600; color:var(--gold); display:block; margin-bottom:6px;">⚡ Select Ladder Preset:</label>
+          <select id="prizePresetSelect" style="font-size:12.5px;">
+            <option value="" disabled selected>Choose a preset option...</option>
+            <option value="uk">1. UK Ladder (£100 to £1,000,000)</option>
+            <option value="us">2. US Ladder ($500 to $1,000,000)</option>
+            <option value="vn_2022_2026">3. Vietnam Ladder 2022 - 2026 (200.000đ to 250.000.000đ)</option>
+            <option value="vn_latest">4. Latest Vietnam Ladder (200.000đ to 400.000.000đ)</option>
+          </select>
+        `;
+        presetWrap.querySelector('#prizePresetSelect').addEventListener('change', e=>{
+          const key = e.target.value;
+          const preset = PRIZE_PRESETS[key];
+          if(preset){
+            values[v.name] = [...preset.amounts];
+            values['LocaleCode'] = preset.locale;
+            if(!values['FormatOptions']) values['FormatOptions'] = {};
+            values['FormatOptions'].currency = preset.currency;
+
+            setDirty(true);
+            render();
+            refreshPreview();
+            toast(`Loaded ${e.target.options[e.target.selectedIndex].text}`);
+          }
+        });
+        wrap.appendChild(presetWrap);
+      }
+
+      const arr = values[v.name];
+      arr.forEach((item, i)=>{
+        const row = document.createElement('div');
+        row.className = 'arr-item';
+        row.innerHTML = `
+          <span class="idx mono">${arrRowLabel(v, i)}</span>
+          ${v.type==='array-number'
+            ? `<input type="number" step="any" data-arr="${v.name}" data-i="${i}" value="${item}">`
+            : `<input type="text" data-arr="${v.name}" data-i="${i}" value="${attrEsc(item)}">`
+          }
+          <button class="rm" data-arr-rm="${v.name}" data-i="${i}" title="Remove">×</button>
+        `;
+        wrap.appendChild(row);
+      });
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'btn small arr-add';
+      addBtn.textContent = '+ Add item';
+      addBtn.addEventListener('click', ()=>{
+        values[v.name].push(v.type==='array-number' ? 0 : '');
+        setDirty(true);
+        renderRows();
+        refreshPreview();
+      });
+      wrap.appendChild(addBtn);
+    }
+    renderRows();
+
+    wrap.addEventListener('input', e=>{
+      const name = e.target.dataset.arr;
+      if(!name) return;
+      const i = +e.target.dataset.i;
+      values[name][i] = v.type==='array-number' ? (parseFloat(e.target.value) || 0) : e.target.value;
+      setDirty(true);
+    });
+    wrap.addEventListener('click', e=>{
+      const name = e.target.dataset.arrRm;
+      if(!name) return;
+      const i = +e.target.dataset.i;
+      values[name].splice(i,1);
+      setDirty(true);
+      renderRows();
+      refreshPreview();
+    });
+
+    return wrap;
+  }
+
+  function htmlEsc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function attrEsc(s){ return htmlEsc(s).replace(/"/g,'&quot;'); }
+
+  formRoot.addEventListener('input', e=>{
+    const name = e.target.dataset.name;
+    if(!name) return;
+    const v = ALL_VARS.find(x=>x.name===name);
+    if(!v) return;
+    if(v.type==='number') values[name] = parseFloat(e.target.value) || 0;
+    else if(v.type==='string') values[name] = e.target.value;
+    setDirty(true);
+  });
+  formRoot.addEventListener('change', e=>{
+    const name = e.target.dataset.name;
+    if(!name) return;
+    const v = ALL_VARS.find(x=>x.name===name);
+    if(v && v.type==='bool'){ values[name] = e.target.checked; setDirty(true); }
+  });
+
+  function refreshPreview(){
+    if(originalText===null) return;
+    previewText.value = buildOutputText();
+  }
+  formRoot.addEventListener('input', refreshPreview);
+  formRoot.addEventListener('change', refreshPreview);
+
+  // ---------------------------------------------------------------
+  // Load / Open
+  // ---------------------------------------------------------------
+  function loadText(text, name){
+    originalText = text;
+    parseAll(text);
+    emptyState.style.display = 'none';
+    formRoot.style.display = 'block';
+    previewDetails.style.display = 'block';
+    $('#exportBtn').disabled = false;
+    render();
+    refreshPreview();
+    setDirty(false);
+    $('#statusText').textContent = fileHandle ? `Connected to "${name}" — Save writes directly to disk` : `Loaded "${name}" manually — use Export to download changes`;
+  }
+
+  $('#openFileBtn').addEventListener('click', async ()=>{
+    if(!hasFSA){
+      toast('Direct file access needs this page served over http(s)://, not opened as a local file. Use "Load Manually" instead.', true);
+      return;
+    }
+    try{
+      const [handle] = await window.showOpenFilePicker({
+        types:[{description:'JavaScript', accept:{'text/javascript':['.js']}}],
+        excludeAcceptAllOption:false
+      });
+      const perm = await handle.requestPermission({mode:'readwrite'});
+      if(perm !== 'granted'){ toast('Write permission was not granted.', true); return; }
+      fileHandle = handle;
+      const file = await handle.getFile();
+      const text = await file.text();
+      loadText(text, handle.name);
+      toast('File connected. Edits now save straight to disk.');
+    }catch(err){
+      if(err.name !== 'AbortError') toast('Could not open file: ' + err.message, true);
+    }
+  });
+
+  $('#openManualBtn').addEventListener('click', ()=>{ $('#fileInputManual').click(); });
+  $('#fileInputManual').addEventListener('change', async e=>{
+    const f = e.target.files[0]; if(!f) return;
+    fileHandle = null;
+    const text = await f.text();
+    loadText(text, f.name);
+    toast('File loaded. Use Export to download your changes.');
+    e.target.value = '';
+  });
+
+  // ---------------------------------------------------------------
+  // Save / Export / Revert
+  // ---------------------------------------------------------------
+  $('#saveBtn').addEventListener('click', async ()=>{
+    const out = buildOutputText();
+    if(fileHandle){
+      try{
+        const w = await fileHandle.createWritable();
+        await w.write(out);
+        await w.close();
+        originalText = out;
+        setDirty(false);
+        toast('Saved to ' + fileHandle.name + ' ✓');
+      }catch(err){
+        toast('Save failed: ' + err.message, true);
+      }
+    } else {
+      downloadFile('gameVariables.js', out);
+      toast('No direct file connection — downloaded instead.');
+    }
+  });
+
+  $('#exportBtn').addEventListener('click', ()=>{
+    const out = buildOutputText();
+    downloadFile(fileHandle ? fileHandle.name : 'gameVariables.js', out);
+    toast('Exported.');
+  });
+
+  $('#revertBtn').addEventListener('click', ()=>{
+    if(!confirm('Discard all unsaved changes and reload the original values?')) return;
+    parseAll(originalText);
+    render();
+    refreshPreview();
+    setDirty(false);
+    toast('Reverted to last saved state.');
+  });
+
+  function downloadFile(filename, text){
+    const blob = new Blob([text], {type:'text/javascript'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+
+  // ---------------------------------------------------------------
+  // Init Banner
+  // ---------------------------------------------------------------
+  const banner = $('#fsaBanner');
+  if(hasFSA){
+    banner.className = 'banner ok';
+    banner.innerHTML = `✓ This browser supports direct saving. Click <b>Open gameVariables.js</b>, pick the file, and <b>Save</b> will write straight back to it — no export/replace needed.`;
+  } else if('showOpenFilePicker' in window){
+    banner.className = 'banner';
+    banner.innerHTML = `⚠ Direct saving needs this page served over <code>http://</code> or <code>https://</code> — it won't work when double-clicked as a local file. Run a local server near your project (e.g. <code>python -m http.server</code>).`;
+  } else {
+    banner.className = 'banner';
+    banner.innerHTML = `⚠ Direct saving not supported on this browser. Use <b>Load Manually</b> to edit, and <b>Export</b> to download.`;
+  }
+
+  setDirty(false);
+})();
+</script>
+</body>
+</html>

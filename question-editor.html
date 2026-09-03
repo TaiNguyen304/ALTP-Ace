@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Question Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e1a;
+    --panel:#121a2e;
+    --panel-2:#0e1526;
+    --line:#232e48;
+    --gold:#e8b84b;
+    --gold-dim:#8a7133;
+    --ink:#f2efe4;
+    --ink-dim:#9aa3bd;
+    --green:#3ecf8e;
+    --red:#e2606b;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #16234a 0%, transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, #1a1440 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    padding-bottom:80px;
+  }
+  ::selection{background:var(--gold);color:#1a1400;}
+
+  /* ---------- top bar ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(10,14,26,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    padding:14px 22px;
+  }
+  .header-row{
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    max-width:1200px; margin:0 auto;
+  }
+  .brand{display:flex; align-items:center; gap:10px; margin-right:auto;}
+  .brand .diamond{
+    width:14px;height:14px;background:var(--gold);
+    transform:rotate(45deg); box-shadow:0 0 12px rgba(232,184,75,0.6);
+  }
+  .brand h1{
+    font-family:'Bebas Neue',sans-serif;
+    letter-spacing:1.5px;
+    font-size:26px;
+    margin:0;
+    color:var(--ink);
+  }
+  .status-line{
+    font-size:12px; color:var(--ink-dim); margin-top:2px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-dim);display:inline-block;}
+  .dot.unsaved{background:var(--red); box-shadow:0 0 6px var(--red);}
+  .dot.saved{background:var(--green); box-shadow:0 0 6px var(--green);}
+
+  .btn{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    padding:9px 14px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--ink);
+    cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px;
+    transition:border-color .15s, transform .1s, background .15s;
+    white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--gold-dim); background:#16203a;}
+  .btn:active{transform:scale(0.97);}
+  .btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .btn.gold{background:linear-gradient(180deg,#f0c568,#d9a838); color:#241a02; border:none;}
+  .btn.gold:hover{filter:brightness(1.08);}
+  .btn.ghost{background:transparent;}
+  .btn.danger{color:var(--red); border-color:#4a2530;}
+  .btn.danger:hover{background:#2a1420;}
+  .btn.small{padding:5px 9px; font-size:11.5px; border-radius:6px;}
+
+  .seg{display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+  .seg button{
+    background:var(--panel); color:var(--ink-dim); border:none; padding:8px 16px;
+    font-weight:600; font-size:13px; cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .seg button.active{background:var(--gold); color:#241a02;}
+
+  .toolbar-2{
+    max-width:1200px; margin:12px auto 0; padding:0 22px;
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  }
+  .toolbar-2 input[type=text]{
+    flex:1; min-width:180px;
+    background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
+    padding:8px 12px; border-radius:8px; font-size:13px; font-family:'Inter',sans-serif;
+  }
+  .toolbar-2 input[type=text]:focus{outline:none; border-color:var(--gold-dim);}
+  .stats{display:flex; gap:14px; font-size:12px; color:var(--ink-dim); margin-left:auto; flex-wrap:wrap;}
+  .stats b{color:var(--gold);}
+
+  .banner{
+    max-width:1200px; margin:12px auto 0; padding:10px 16px;
+    background:#241a08; border:1px solid #4a341a; border-radius:8px;
+    font-size:12.5px; color:#e4c485; line-height:1.5;
+  }
+  .banner code{background:#0007; padding:1px 5px; border-radius:4px;}
+  .banner.ok{background:#0e2a1f; border-color:#1e4a35; color:#a7e8cb;}
+
+  main{max-width:1200px; margin:18px auto; padding:0 22px;}
+
+  /* ---------- edit cards ---------- */
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:16px;
+    overflow:hidden;
+  }
+  .card-head{
+    display:flex; align-items:center; gap:10px;
+    padding:12px 16px;
+    background:var(--panel-2);
+    border-bottom:1px solid var(--line);
+  }
+  .card-idx{
+    font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--gold-dim);
+    width:28px; text-align:center;
+  }
+  .tag{
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.6px;
+    padding:3px 8px; border-radius:5px; background:#1c2744; color:var(--ink-dim);
+  }
+  .tag.fastest{background:#2e2044; color:#c9a8f5;}
+  .card-head .spacer{flex:1;}
+  .icon-btn{
+    background:transparent; border:none; color:var(--ink-dim); cursor:pointer;
+    padding:5px; border-radius:6px; font-size:13px;
+  }
+  .icon-btn:hover{color:var(--ink); background:#1c2744;}
+  .icon-btn.danger:hover{color:var(--red); background:#2a1420;}
+
+  .card-body{padding:16px;}
+  .field{margin-bottom:12px;}
+  .field label{
+    display:block; font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.5px; color:var(--ink-dim); margin-bottom:5px;
+  }
+  .field input[type=text], .field textarea, .field select{
+    width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
+    padding:9px 11px; border-radius:7px; font-size:14px; font-family:'Inter',sans-serif;
+    resize:vertical;
+  }
+  .field input[type=text]:focus, .field textarea:focus, .field select:focus{
+    outline:none; border-color:var(--gold-dim);
+  }
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .row4{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  @media(max-width:720px){.row2,.row4{grid-template-columns:1fr;}}
+
+  .answer-row{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+  .answer-row .letter{
+    width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700; font-size:12px; background:#1c2744; color:var(--ink-dim);
+    flex-shrink:0;
+  }
+  .answer-row.is-correct .letter{background:var(--green); color:#04241a;}
+  .answer-row input[type=radio]{accent-color:var(--green); width:16px; height:16px; flex-shrink:0;}
+  .answer-row input[type=text]{flex:1;}
+
+  .order-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  .order-warn{color:var(--red); font-size:12px; margin-top:6px;}
+
+  .info-box{
+    margin-top:14px; padding:14px; border-radius:8px;
+    background:var(--panel-2); border:1px dashed var(--line);
+  }
+  .info-box .field:last-child{margin-bottom:0;}
+  .info-box-title{
+    font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    color:var(--ink-dim); margin-bottom:10px; display:flex; align-items:center; gap:6px;
+  }
+  .info-box textarea{min-height:90px;}
+
+  /* ---------- orphan info ---------- */
+  .orphan-section{margin-top:26px;}
+  .orphan-section h3{
+    font-family:'Bebas Neue',sans-serif; letter-spacing:1px; font-size:18px;
+    color:var(--red); margin:0 0 8px;
+  }
+  .orphan-note{font-size:12.5px; color:var(--ink-dim); margin-bottom:10px; line-height:1.5;}
+  .orphan-card{
+    background:var(--panel); border:1px solid #4a2530; border-radius:8px;
+    padding:12px; margin-bottom:10px;
+  }
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:var(--ink-dim);
+  }
+  .empty-state .diamond-big{
+    width:34px;height:34px;background:var(--gold); margin:0 auto 16px;
+    transform:rotate(45deg); box-shadow:0 0 20px rgba(232,184,75,0.4);
+  }
+
+  .add-row{display:flex; gap:10px; justify-content:center; margin:22px 0 40px;}
+
+  /* ---------- preview stage ---------- */
+  .stage-wrap{
+    display:flex; flex-direction:column; align-items:center; gap:18px;
+  }
+  .stage-nav{display:flex; align-items:center; gap:16px;}
+  .stage-count{font-family:'Bebas Neue',sans-serif; letter-spacing:1px; font-size:16px; color:var(--ink-dim);}
+  .stage-count b{color:var(--gold);}
+  .stage{
+    width:100%; max-width:900px;
+    background:
+      radial-gradient(700px 300px at 50% -20%, #1c2a55 0%, transparent 60%),
+      linear-gradient(180deg,#0d1428,#080c18);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:44px 40px;
+    position:relative;
+    overflow:hidden;
+  }
+  .stage::before{
+    content:"";
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(115deg, rgba(232,184,75,0.03) 0px, rgba(232,184,75,0.03) 1px, transparent 1px, transparent 26px);
+    pointer-events:none;
+  }
+  .stage-cat{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:1.2px;
+    text-transform:uppercase; color:#241a02; background:var(--gold);
+    padding:5px 12px; border-radius:20px; margin-bottom:18px;
+  }
+  .stage-diff{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:1px;
+    text-transform:uppercase; color:var(--ink-dim); border:1px solid var(--line);
+    padding:4px 10px; border-radius:20px; margin-left:8px;
+  }
+  .stage-q{
+    font-family:'Fraunces',serif; font-weight:600; font-size:clamp(20px,3vw,30px);
+    line-height:1.35; color:var(--ink); margin:0 0 30px; position:relative;
+  }
+  .stage-options{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media(max-width:640px){.stage-options{grid-template-columns:1fr;}}
+  .opt{
+    display:flex; align-items:center; gap:12px;
+    background:#101a33; border:1px solid var(--line); border-radius:10px;
+    padding:14px 16px; font-size:15px; position:relative;
+  }
+  .opt .letter{
+    width:26px;height:26px;border-radius:50%; flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700; font-size:12px; background:#1c2744; color:var(--ink-dim);
+  }
+  .opt.correct{border-color:var(--green); background:#0e2a20;}
+  .opt.correct .letter{background:var(--green); color:#04241a;}
+  .opt.correct::after{content:"✓"; position:absolute; right:14px; color:var(--green); font-weight:700;}
+  .opt.ranked .letter{background:var(--gold); color:#241a02;}
+  .rank-badge{
+    font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:.5px;
+    color:var(--gold); margin-right:4px;
+  }
+  .stage-info{
+    margin-top:28px; padding-top:22px; border-top:1px dashed var(--line);
+  }
+  .stage-info summary{
+    cursor:pointer; font-size:12px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.6px; color:var(--gold-dim); list-style:none; display:flex; align-items:center; gap:6px;
+  }
+  .stage-info summary::-webkit-details-marker{display:none;}
+  .stage-info summary::before{content:"▸"; transition:transform .15s;}
+  .stage-info[open] summary::before{transform:rotate(90deg);}
+  .stage-info .info-cat{font-size:11px; color:var(--ink-dim); margin:12px 0 6px;}
+  .stage-info p{
+    font-size:14px; line-height:1.7; color:#cfd4e6; white-space:pre-wrap; margin:0;
+  }
+  .stage-info .no-info{color:var(--ink-dim); font-style:italic; font-size:13px; margin-top:10px;}
+
+  .stage-strip{
+    display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:900px;
+  }
+  .strip-dot{
+    width:9px;height:9px;border-radius:50%; background:var(--line); border:none; cursor:pointer; padding:0;
+  }
+  .strip-dot.active{background:var(--gold);}
+  .strip-dot.fastest{background:#6b4fa0;}
+
+  /* ---------- toast ---------- */
+  #toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--panel); border:1px solid var(--gold-dim); color:var(--ink);
+    padding:12px 20px; border-radius:8px; font-size:13px; font-weight:600;
+    box-shadow:0 8px 30px rgba(0,0,0,0.5);
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
+    z-index:100; display:flex; align-items:center; gap:8px;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  #toast.err{border-color:#4a2530; color:#f5b8c0;}
+
+  .visually-hidden{position:absolute; width:1px;height:1px; overflow:hidden; clip:rect(0,0,0,0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="brand">
+      <div class="diamond"></div>
+      <div>
+        <h1>QUESTION EDITOR</h1>
+        <div class="status-line"><span class="dot" id="statusDot"></span><span id="statusText">No folder opened yet</span></div>
+      </div>
+    </div>
+
+    <button class="btn" id="openFolderBtn">📁 Open Questions Folder</button>
+    <button class="btn" id="openFilesBtn">📄 Load Files Manually</button>
+    <button class="btn gold" id="saveBtn" disabled>💾 Save</button>
+    <button class="btn" id="exportBtn" disabled>⇩ Export</button>
+    <div class="seg">
+      <button id="modeEdit" class="active">Edit</button>
+      <button id="modePreview">Preview</button>
+    </div>
+  </div>
+
+  <div class="toolbar-2" id="toolbar2" style="display:none;">
+    <input type="text" id="searchBox" placeholder="Search question text or category…">
+    <div class="stats" id="statsBar"></div>
+  </div>
+</header>
+
+<main>
+  <div class="banner" id="fsaBanner"></div>
+
+  <div id="emptyState" class="empty-state">
+    <div class="diamond-big"></div>
+    <p style="font-family:'Fraunces',serif; font-size:19px; margin:0 0 8px;">No questions loaded</p>
+    <p style="font-size:13px; max-width:420px; margin:0 auto 22px; line-height:1.6;">
+      Open your <code>Questions</code> folder for one-click saving straight back to
+      <code>questions.xml</code> and <code>info.xml</code> — or load the two files manually
+      if your browser doesn't support direct folder access.
+    </p>
+  </div>
+
+  <div id="editView" style="display:none;"></div>
+  <div id="previewView" style="display:none;"></div>
+
+  <div class="add-row" id="addRow" style="display:none;">
+    <button class="btn" id="addQuestionBtn">+ Add Question</button>
+    <button class="btn" id="addFastestBtn">+ Add Fastest Finger Question</button>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<!-- fallback hidden inputs for manual file loading -->
+<input type="file" id="qFileInput" accept=".xml" class="visually-hidden">
+<input type="file" id="iFileInput" accept=".xml" class="visually-hidden">
+
+<script>
+(function(){
+  'use strict';
+
+  // ---------------------------------------------------------------
+  // state
+  // ---------------------------------------------------------------
+  let items = [];          // unified list: {type:'question'|'fastest', ...}
+  let orphanInfos = [];     // leftover <question> entries from info.xml with no matching question item
+  let dirHandle = null;
+  let qFileHandle = null;
+  let iFileHandle = null;
+  let hasFSA = 'showDirectoryPicker' in window && location.protocol !== 'file:';
+  let dirty = false;
+  let mode = 'edit'; // 'edit' | 'preview'
+  let previewIndex = 0;
+  let searchTerm = '';
+
+  const $ = sel => document.querySelector(sel);
+  const editView = $('#editView');
+  const previewView = $('#previewView');
+  const emptyState = $('#emptyState');
+  const addRow = $('#addRow');
+  const toolbar2 = $('#toolbar2');
+
+  // ---------------------------------------------------------------
+  // helpers
+  // ---------------------------------------------------------------
+  function esc(str){
+    return String(str ?? '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;');
+  }
+  function textOf(parent, tag){
+    if(!parent) return '';
+    const el = parent.querySelector(tag);
+    return el ? el.textContent.trim() : '';
+  }
+  function uid(){ return Math.random().toString(36).slice(2,10); }
+
+  function setDirty(v){
+    dirty = v;
+    const dot = $('#statusDot');
+    dot.classList.toggle('unsaved', v);
+    dot.classList.toggle('saved', !v && (qFileHandle || items.length));
+    $('#saveBtn').disabled = !(dirty && qFileHandle);
+  }
+
+  function toast(msg, isErr){
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.toggle('err', !!isErr);
+    t.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>t.classList.remove('show'), 3200);
+  }
+
+  window.addEventListener('beforeunload', e=>{
+    if(dirty){ e.preventDefault(); e.returnValue=''; }
+  });
+
+  // ---------------------------------------------------------------
+  // parsing
+  // ---------------------------------------------------------------
+  function parseQuestionsXml(xmlText){
+    const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+    if(doc.querySelector('parsererror')) throw new Error('questions.xml is not valid XML');
+    const root = doc.documentElement;
+    const out = [];
+    Array.from(root.children).forEach(node=>{
+      const tag = node.tagName.toLowerCase();
+      if(tag === 'fastest'){
+        const co = node.querySelector('correctOrder');
+        out.push({
+          _id: uid(),
+          type:'fastest',
+          difficulty: node.getAttribute('difficulty') || '0',
+          text: textOf(node,'text'),
+          a: textOf(node,'a'), b: textOf(node,'b'), c: textOf(node,'c'), d: textOf(node,'d'),
+          order:{
+            one: textOf(co,'one') || 'a',
+            two: textOf(co,'two') || 'b',
+            three: textOf(co,'three') || 'c',
+            four: textOf(co,'four') || 'd',
+          }
+        });
+      } else if(tag === 'question'){
+        const aEl=node.querySelector('a'), bEl=node.querySelector('b'), cEl=node.querySelector('c'), dEl=node.querySelector('d');
+        let correct='a';
+        [['a',aEl],['b',bEl],['c',cEl],['d',dEl]].forEach(([k,el])=>{
+          if(el && el.getAttribute('correct')==='yes') correct=k;
+        });
+        out.push({
+          _id: uid(),
+          type:'question',
+          category: textOf(node,'category'),
+          text: textOf(node,'text'),
+          a: aEl?aEl.textContent.trim():'',
+          b: bEl?bEl.textContent.trim():'',
+          c: cEl?cEl.textContent.trim():'',
+          d: dEl?dEl.textContent.trim():'',
+          correct,
+          info: {category:'', text:''}
+        });
+      }
+    });
+    return out;
+  }
+
+  function parseInfoXml(xmlText){
+    const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+    if(doc.querySelector('parsererror')) throw new Error('info.xml is not valid XML');
+    const root = doc.documentElement;
+    const out = [];
+    Array.from(root.children).forEach(node=>{
+      if(node.tagName.toLowerCase()==='question'){
+        out.push({ category: textOf(node,'category'), text: textOf(node,'text') });
+      }
+    });
+    return out;
+  }
+
+  function mergeInfoIntoItems(infoItems){
+    let qi = 0;
+    items.forEach(item=>{
+      if(item.type==='question'){
+        item.info = infoItems[qi] ? {...infoItems[qi]} : {category:'', text:''};
+        qi++;
+      }
+    });
+    orphanInfos = infoItems.slice(qi).map(o=>({_id:uid(), ...o}));
+  }
+
+  // ---------------------------------------------------------------
+  // building xml
+  // ---------------------------------------------------------------
+  function buildQuestionsXml(){
+    const lines = ['<questions>'];
+    items.forEach(item=>{
+      if(item.type==='fastest'){
+        lines.push(`\t<fastest difficulty="${esc(item.difficulty)}">`);
+        lines.push(`\t\t<text>${esc(item.text)}</text>`);
+        lines.push(`\t\t<a>${esc(item.a)}</a>`);
+        lines.push(`\t\t<b>${esc(item.b)}</b>`);
+        lines.push(`\t\t<c>${esc(item.c)}</c>`);
+        lines.push(`\t\t<d>${esc(item.d)}</d>`);
+        lines.push(`\t\t<correctOrder>`);
+        lines.push(`\t\t\t<one>${esc(item.order.one)}</one>`);
+        lines.push(`\t\t\t<two>${esc(item.order.two)}</two>`);
+        lines.push(`\t\t\t<three>${esc(item.order.three)}</three>`);
+        lines.push(`\t\t\t<four>${esc(item.order.four)}</four>`);
+        lines.push(`\t\t</correctOrder>`);
+        lines.push(`\t</fastest>`);
+      } else {
+        lines.push(`\t<question>`);
+        lines.push(`\t\t<category>${esc(item.category)}</category>`);
+        lines.push(`\t\t<text>${esc(item.text)}</text>`);
+        ['a','b','c','d'].forEach(k=>{
+          lines.push(`\t\t<${k} correct="${item.correct===k ? 'yes':'no'}">${esc(item[k])}</${k}>`);
+        });
+        lines.push(`\t</question>`);
+      }
+    });
+    lines.push('</questions>');
+    return lines.join('\n');
+  }
+
+  function buildInfoXml(){
+    const lines = ['<questions>'];
+    items.filter(i=>i.type==='question').forEach(item=>{
+      lines.push('\t<question>');
+      lines.push(`\t\t<category>${esc(item.info.category)}</category>`);
+      lines.push(`\t\t<text>${esc(item.info.text)}</text>`);
+      lines.push('\t</question>');
+    });
+    orphanInfos.forEach(o=>{
+      lines.push('\t<question>');
+      lines.push(`\t\t<category>${esc(o.category)}</category>`);
+      lines.push(`\t\t<text>${esc(o.text)}</text>`);
+      lines.push('\t</question>');
+    });
+    lines.push('</questions>');
+    return lines.join('\n');
+  }
+
+  // ---------------------------------------------------------------
+  // File System Access — open folder
+  // ---------------------------------------------------------------
+  async function findFileCaseInsensitive(handle, name){
+    const lower = name.toLowerCase();
+    for await (const [entryName, entryHandle] of handle.entries()){
+      if(entryHandle.kind==='file' && entryName.toLowerCase()===lower) return entryHandle;
+    }
+    return null;
+  }
+
+  $('#openFolderBtn').addEventListener('click', async ()=>{
+    if(!hasFSA){
+      toast('Direct folder access needs this page served over http(s)://, not opened as a local file. Use "Load Files Manually" instead.', true);
+      return;
+    }
+    try{
+      dirHandle = await window.showDirectoryPicker();
+      const perm = await dirHandle.requestPermission({mode:'readwrite'});
+      if(perm !== 'granted'){ toast('Write permission was not granted.', true); return; }
+
+      qFileHandle = await findFileCaseInsensitive(dirHandle, 'questions.xml');
+      iFileHandle = await findFileCaseInsensitive(dirHandle, 'info.xml');
+
+      if(!qFileHandle){
+        qFileHandle = await dirHandle.getFileHandle('questions.xml', {create:true});
+      }
+      if(!iFileHandle){
+        iFileHandle = await dirHandle.getFileHandle('info.xml', {create:true});
+      }
+
+      const qFile = await qFileHandle.getFile();
+      const qText = await qFile.text();
+      const iFile = await iFileHandle.getFile();
+      const iText = await iFile.text();
+
+      items = qText.trim() ? parseQuestionsXml(qText) : [];
+      const infoItems = iText.trim() ? parseInfoXml(iText) : [];
+      mergeInfoIntoItems(infoItems);
+
+      $('#statusText').textContent = `Connected to "${dirHandle.name}" — questions.xml + info.xml`;
+      $('#exportBtn').disabled = false;
+      setDirty(false);
+      render();
+      toast('Folder connected. Edits now save straight to disk.');
+    }catch(err){
+      if(err.name !== 'AbortError') toast('Could not open folder: ' + err.message, true);
+    }
+  });
+
+  // ---------------------------------------------------------------
+  // manual fallback loading
+  // ---------------------------------------------------------------
+  let pendingQText=null, pendingIText=null;
+  $('#openFilesBtn').addEventListener('click', ()=>{ $('#qFileInput').click(); });
+  $('#qFileInput').addEventListener('change', async e=>{
+    const f = e.target.files[0]; if(!f) return;
+    pendingQText = await f.text();
+    toast('Loaded questions.xml — now pick your info.xml');
+    $('#iFileInput').click();
+  });
+  $('#iFileInput').addEventListener('change', async e=>{
+    const f = e.target.files[0];
+    pendingIText = f ? await f.text() : '<questions></questions>';
+    try{
+      items = pendingQText.trim() ? parseQuestionsXml(pendingQText) : [];
+      const infoItems = pendingIText.trim() ? parseInfoXml(pendingIText) : [];
+      mergeInfoIntoItems(infoItems);
+      qFileHandle = null; iFileHandle = null; dirHandle = null;
+      $('#statusText').textContent = 'Loaded manually — direct save unavailable, use Export';
+      $('#exportBtn').disabled = false;
+      setDirty(false);
+      render();
+      toast('Files loaded. Use Export to download your changes.');
+    }catch(err){
+      toast('Could not parse files: ' + err.message, true);
+    }
+    e.target.value=''; $('#qFileInput').value='';
+  });
+
+  // ---------------------------------------------------------------
+  // Save / Export
+  // ---------------------------------------------------------------
+  $('#saveBtn').addEventListener('click', async ()=>{
+    if(!qFileHandle) return;
+    try{
+      const qw = await qFileHandle.createWritable();
+      await qw.write(buildQuestionsXml());
+      await qw.close();
+      if(iFileHandle){
+        const iw = await iFileHandle.createWritable();
+        await iw.write(buildInfoXml());
+        await iw.close();
+      }
+      setDirty(false);
+      toast('Saved to questions.xml and info.xml ✓');
+    }catch(err){
+      toast('Save failed: ' + err.message, true);
+    }
+  });
+
+  function download(filename, text){
+    const blob = new Blob([text], {type:'application/xml'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+  $('#exportBtn').addEventListener('click', ()=>{
+    download('questions.xml', buildQuestionsXml());
+    setTimeout(()=>download('info.xml', buildInfoXml()), 350);
+    toast('Exported questions.xml and info.xml');
+  });
+
+  // ---------------------------------------------------------------
+  // add / delete / move
+  // ---------------------------------------------------------------
+  $('#addQuestionBtn').addEventListener('click', ()=>{
+    items.push({
+      _id:uid(), type:'question', category:'', text:'',
+      a:'', b:'', c:'', d:'', correct:'a', info:{category:'', text:''}
+    });
+    setDirty(true); render();
+    document.querySelector('#editView .card:last-child')?.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+  $('#addFastestBtn').addEventListener('click', ()=>{
+    items.push({
+      _id:uid(), type:'fastest', difficulty:'0', text:'',
+      a:'', b:'', c:'', d:'', order:{one:'a',two:'b',three:'c',four:'d'}
+    });
+    setDirty(true); render();
+    document.querySelector('#editView .card:last-child')?.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+
+  function deleteItem(id){
+    if(!confirm('Delete this question? This cannot be undone.')) return;
+    items = items.filter(i=>i._id!==id);
+    setDirty(true); render();
+  }
+  function moveItem(id, dir){
+    const idx = items.findIndex(i=>i._id===id);
+    const target = idx+dir;
+    if(target<0 || target>=items.length) return;
+    [items[idx], items[target]] = [items[target], items[idx]];
+    setDirty(true); render();
+  }
+  function deleteOrphan(id){
+    orphanInfos = orphanInfos.filter(o=>o._id!==id);
+    setDirty(true); render();
+  }
+
+  // ---------------------------------------------------------------
+  // rendering — edit mode
+  // ---------------------------------------------------------------
+  function matchesSearch(item){
+    if(!searchTerm) return true;
+    const t = searchTerm.toLowerCase();
+    const hay = [item.text, item.category, item.a, item.b, item.c, item.d].join(' ').toLowerCase();
+    return hay.includes(t);
+  }
+
+  function renderEdit(){
+    editView.innerHTML = '';
+    const filtered = items.map((item,i)=>({item, realIndex:i})).filter(x=>matchesSearch(x.item));
+
+    filtered.forEach(({item, realIndex})=>{
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = item._id;
+
+      const head = document.createElement('div');
+      head.className = 'card-head';
+      head.innerHTML = `
+        <div class="card-idx">${realIndex+1}</div>
+        <span class="tag ${item.type==='fastest'?'fastest':''}">${item.type==='fastest'?'Fastest Finger':'Question'}</span>
+        <div class="spacer"></div>
+        <button class="icon-btn" data-action="up" title="Move up">↑</button>
+        <button class="icon-btn" data-action="down" title="Move down">↓</button>
+        <button class="icon-btn danger" data-action="delete" title="Delete">🗑</button>
+      `;
+      card.appendChild(head);
+
+      const body = document.createElement('div');
+      body.className = 'card-body';
+
+      if(item.type==='question'){
+        body.innerHTML = `
+          <div class="row2">
+            <div class="field">
+              <label>Category</label>
+              <input type="text" data-field="category" value="${attrEsc(item.category)}" list="categoryList">
+            </div>
+          </div>
+          <div class="field">
+            <label>Question Text</label>
+            <textarea data-field="text" rows="2">${htmlEsc(item.text)}</textarea>
+          </div>
+          <div class="field">
+            <label>Answers — select the correct one</label>
+            ${['a','b','c','d'].map(k=>`
+              <div class="answer-row ${item.correct===k?'is-correct':''}" data-letter="${k}">
+                <div class="letter">${k.toUpperCase()}</div>
+                <input type="radio" name="correct-${item._id}" data-field="correct" value="${k}" ${item.correct===k?'checked':''}>
+                <input type="text" data-field="ans-${k}" value="${attrEsc(item[k])}" placeholder="Answer ${k.toUpperCase()}">
+              </div>
+            `).join('')}
+          </div>
+          <div class="info-box">
+            <div class="info-box-title">📋 Background info (info.xml)</div>
+            <div class="field">
+              <label>Info category</label>
+              <input type="text" data-field="info-category" value="${attrEsc(item.info.category)}">
+            </div>
+            <div class="field">
+              <label>Info text</label>
+              <textarea data-field="info-text" rows="4" placeholder="Longer background / host notes for this question…">${htmlEsc(item.info.text)}</textarea>
+            </div>
+          </div>
+        `;
+      } else {
+        body.innerHTML = `
+          <div class="row2">
+            <div class="field">
+              <label>Difficulty</label>
+              <input type="text" data-field="difficulty" value="${attrEsc(item.difficulty)}">
+            </div>
+          </div>
+          <div class="field">
+            <label>Prompt Text</label>
+            <textarea data-field="text" rows="2">${htmlEsc(item.text)}</textarea>
+          </div>
+          <div class="field">
+            <label>Options</label>
+            ${['a','b','c','d'].map(k=>`
+              <div class="answer-row" data-letter="${k}">
+                <div class="letter">${k.toUpperCase()}</div>
+                <input type="text" data-field="ans-${k}" value="${attrEsc(item[k])}" style="margin-left:36px;" placeholder="Option ${k.toUpperCase()}">
+              </div>
+            `).join('')}
+          </div>
+          <div class="field">
+            <label>Correct Order (first → last)</label>
+            <div class="order-grid">
+              ${['one','two','three','four'].map((rank,idx)=>`
+                <select data-field="order-${rank}">
+                  ${['a','b','c','d'].map(k=>`<option value="${k}" ${item.order[rank]===k?'selected':''}>${idx+1}${['st','nd','rd','th'][idx]} — ${k.toUpperCase()}</option>`).join('')}
+                </select>
+              `).join('')}
+            </div>
+            <div class="order-warn" data-order-warn style="display:none;">⚠ Order must use each of A, B, C, D exactly once.</div>
+          </div>
+        `;
+      }
+
+      card.appendChild(body);
+      editView.appendChild(card);
+      checkOrderValidity(card, item);
+    });
+
+    if(orphanInfos.length){
+      const sec = document.createElement('div');
+      sec.className = 'orphan-section';
+      sec.innerHTML = `<h3>⚠ Unmatched info.xml entries (${orphanInfos.length})</h3>
+        <div class="orphan-note">These info entries don't line up with any question above (info.xml had more
+        entries than questions.xml). They'll still be saved back to info.xml unless you delete them.</div>`;
+      orphanInfos.forEach(o=>{
+        const c = document.createElement('div');
+        c.className = 'orphan-card';
+        c.dataset.id = o._id;
+        c.innerHTML = `
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <div style="flex:1;">
+              <div class="field"><label>Category</label><input type="text" data-orphan-field="category" value="${attrEsc(o.category)}"></div>
+              <div class="field" style="margin-bottom:0;"><label>Text</label><textarea data-orphan-field="text" rows="2">${htmlEsc(o.text)}</textarea></div>
+            </div>
+            <button class="icon-btn danger" data-orphan-delete title="Delete">🗑</button>
+          </div>
+        `;
+        sec.appendChild(c);
+      });
+      editView.appendChild(sec);
+    }
+  }
+
+  function checkOrderValidity(card, item){
+    if(item.type!=='fastest') return;
+    const vals = Object.values(item.order);
+    const valid = new Set(vals).size===4;
+    const warn = card.querySelector('[data-order-warn]');
+    if(warn) warn.style.display = valid ? 'none' : 'block';
+  }
+
+  function htmlEsc(s){ return esc(s); }
+  function attrEsc(s){ return esc(s).replace(/"/g,'&quot;'); }
+
+  // delegated input handling (keeps focus/cursor position — no full re-render on keystroke)
+  editView.addEventListener('input', e=>{
+    const card = e.target.closest('.card');
+    const orphanCard = e.target.closest('.orphan-card');
+    if(card){
+      const item = items.find(i=>i._id===card.dataset.id);
+      if(!item) return;
+      const field = e.target.dataset.field;
+      if(!field) return;
+      if(field==='category') item.category = e.target.value;
+      else if(field==='text') item.text = e.target.value;
+      else if(field==='difficulty') item.difficulty = e.target.value;
+      else if(field==='info-category') item.info.category = e.target.value;
+      else if(field==='info-text') item.info.text = e.target.value;
+      else if(field.startsWith('ans-')) item[field.slice(4)] = e.target.value;
+      else if(field.startsWith('order-')){
+        item.order[field.slice(6)] = e.target.value;
+        checkOrderValidity(card, item);
+      }
+      setDirty(true);
+    } else if(orphanCard){
+      const o = orphanInfos.find(x=>x._id===orphanCard.dataset.id);
+      if(!o) return;
+      const field = e.target.dataset.orphanField;
+      if(field) o[field] = e.target.value;
+      setDirty(true);
+    }
+  });
+
+  editView.addEventListener('change', e=>{
+    const card = e.target.closest('.card');
+    if(!card) return;
+    const item = items.find(i=>i._id===card.dataset.id);
+    if(!item) return;
+    if(e.target.dataset.field==='correct'){
+      item.correct = e.target.value;
+      card.querySelectorAll('.answer-row').forEach(row=>{
+        row.classList.toggle('is-correct', row.dataset.letter===item.correct);
+      });
+      setDirty(true);
+    }
+  });
+
+  editView.addEventListener('click', e=>{
+    const card = e.target.closest('.card');
+    if(card){
+      const action = e.target.dataset.action;
+      if(action==='delete') deleteItem(card.dataset.id);
+      else if(action==='up') moveItem(card.dataset.id, -1);
+      else if(action==='down') moveItem(card.dataset.id, 1);
+      return;
+    }
+    if(e.target.hasAttribute('data-orphan-delete')){
+      const oc = e.target.closest('.orphan-card');
+      deleteOrphan(oc.dataset.id);
+    }
+  });
+
+  // ---------------------------------------------------------------
+  // rendering — preview mode
+  // ---------------------------------------------------------------
+  function renderPreview(){
+    previewView.innerHTML = '';
+    if(!items.length) return;
+    if(previewIndex >= items.length) previewIndex = items.length-1;
+    if(previewIndex < 0) previewIndex = 0;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'stage-wrap';
+
+    const nav = document.createElement('div');
+    nav.className = 'stage-nav';
+    nav.innerHTML = `
+      <button class="btn" id="prevStage">← Prev</button>
+      <div class="stage-count"><b>${previewIndex+1}</b> / ${items.length}</div>
+      <button class="btn" id="nextStage">Next →</button>
+    `;
+    wrap.appendChild(nav);
+
+    const item = items[previewIndex];
+    const stage = document.createElement('div');
+    stage.className = 'stage';
+
+    if(item.type==='question'){
+      stage.innerHTML = `
+        <span class="stage-cat">${htmlEsc(item.category || 'Uncategorized')}</span>
+        <p class="stage-q">${htmlEsc(item.text || '(no question text yet)')}</p>
+        <div class="stage-options">
+          ${['a','b','c','d'].map(k=>`
+            <div class="opt ${item.correct===k?'correct':''}">
+              <div class="letter">${k.toUpperCase()}</div>
+              <div>${htmlEsc(item[k] || '(empty)')}</div>
+            </div>
+          `).join('')}
+        </div>
+        <details class="stage-info">
+          <summary>Background info</summary>
+          ${item.info.text ? `
+            <div class="info-cat">${htmlEsc(item.info.category || 'No category')}</div>
+            <p>${htmlEsc(item.info.text)}</p>
+          ` : `<p class="no-info">No background info written for this question yet.</p>`}
+        </details>
+      `;
+    } else {
+      const rankLabel = {one:'1st',two:'2nd',three:'3rd',four:'4th'};
+      const rankOf = k => Object.entries(item.order).find(([,v])=>v===k)?.[0];
+      stage.innerHTML = `
+        <span class="stage-cat">Fastest Finger First</span>
+        <span class="stage-diff">Difficulty ${htmlEsc(item.difficulty)}</span>
+        <p class="stage-q">${htmlEsc(item.text || '(no prompt text yet)')}</p>
+        <div class="stage-options">
+          ${['a','b','c','d'].map(k=>{
+            const r = rankOf(k);
+            return `
+              <div class="opt ranked">
+                <div class="letter">${k.toUpperCase()}</div>
+                <div style="flex:1;">${htmlEsc(item[k] || '(empty)')}</div>
+                <span class="rank-badge">${r ? rankLabel[r] : '?'}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+    wrap.appendChild(stage);
+
+    const strip = document.createElement('div');
+    strip.className = 'stage-strip';
+    items.forEach((it,idx)=>{
+      const dot = document.createElement('button');
+      dot.className = 'strip-dot' + (idx===previewIndex?' active':'') + (it.type==='fastest'?' fastest':'');
+      dot.title = `#${idx+1}`;
+      dot.addEventListener('click', ()=>{ previewIndex = idx; renderPreview(); });
+      strip.appendChild(dot);
+    });
+    wrap.appendChild(strip);
+
+    previewView.appendChild(wrap);
+    $('#prevStage').addEventListener('click', ()=>{ previewIndex = Math.max(0, previewIndex-1); renderPreview(); });
+    $('#nextStage').addEventListener('click', ()=>{ previewIndex = Math.min(items.length-1, previewIndex+1); renderPreview(); });
+  }
+
+  // ---------------------------------------------------------------
+  // categories datalist + stats
+  // ---------------------------------------------------------------
+  function renderMeta(){
+    let dl = document.getElementById('categoryList');
+    if(!dl){
+      dl = document.createElement('datalist');
+      dl.id = 'categoryList';
+      document.body.appendChild(dl);
+    }
+    const cats = [...new Set(items.filter(i=>i.type==='question').map(i=>i.category).filter(Boolean))];
+    dl.innerHTML = cats.map(c=>`<option value="${attrEsc(c)}">`).join('');
+
+    const qCount = items.filter(i=>i.type==='question').length;
+    const fCount = items.filter(i=>i.type==='fastest').length;
+    $('#statsBar').innerHTML = `<span><b>${qCount}</b> questions</span><span><b>${fCount}</b> fastest-finger</span><span><b>${cats.length}</b> categories</span>${orphanInfos.length?`<span style="color:var(--red)">${orphanInfos.length} unmatched info</span>`:''}`;
+  }
+
+  // ---------------------------------------------------------------
+  // top-level render
+  // ---------------------------------------------------------------
+  function render(){
+    const hasData = items.length>0 || orphanInfos.length>0;
+    emptyState.style.display = hasData ? 'none' : 'block';
+    addRow.style.display = hasData || dirHandle || qFileHandle ? 'flex' : 'flex';
+    toolbar2.style.display = hasData ? 'flex' : 'none';
+
+    if(mode==='edit'){
+      editView.style.display = 'block';
+      previewView.style.display = 'none';
+      renderEdit();
+    } else {
+      editView.style.display = 'none';
+      previewView.style.display = 'block';
+      renderPreview();
+    }
+    renderMeta();
+  }
+
+  // ---------------------------------------------------------------
+  // top bar controls
+  // ---------------------------------------------------------------
+  $('#modeEdit').addEventListener('click', ()=>{
+    mode='edit'; $('#modeEdit').classList.add('active'); $('#modePreview').classList.remove('active'); render();
+  });
+  $('#modePreview').addEventListener('click', ()=>{
+    if(!items.length){ toast('Add or load at least one question first.', true); return; }
+    mode='preview'; $('#modePreview').classList.add('active'); $('#modeEdit').classList.remove('active'); render();
+  });
+  $('#searchBox').addEventListener('input', e=>{ searchTerm = e.target.value; renderEdit(); });
+
+  // ---------------------------------------------------------------
+  // init banner
+  // ---------------------------------------------------------------
+  const banner = $('#fsaBanner');
+  if(hasFSA){
+    banner.className = 'banner ok';
+    banner.innerHTML = `✓ This browser supports direct saving. Click <b>Open Questions Folder</b>, pick your <code>Questions</code> folder, and <b>Save</b> will write straight to <code>questions.xml</code> and <code>info.xml</code> — no export/replace needed.`;
+  } else if('showDirectoryPicker' in window){
+    banner.className = 'banner';
+    banner.innerHTML = `⚠ Direct saving needs this page served over <code>http://</code> or <code>https://</code> — it won't work when double-clicked as a local file. Run a quick local server (e.g. <code>python -m http.server</code>) in your <code>Questions</code> folder, then open this page from <code>http://localhost:8000/…</code>. Until then, use <b>Load Files Manually</b> + <b>Export</b>.`;
+  } else {
+    banner.className = 'banner';
+    banner.innerHTML = `⚠ This browser doesn't support direct-to-disk saving (that needs Chrome, Edge, or another Chromium browser). Use <b>Load Files Manually</b> to edit, and <b>Export</b> to download your changes — then replace the files yourself.`;
+  }
+
+  setDirty(false);
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hot Seat — Control Panel</title>
+<script>window.isControllerPage = true;</script>
+<script src="socket.io/socket.io.js"></script>
+<script src="linking.js"></script>
+<style>
+  :root{
+    --navy-deep:#03081a;
+    --navy:#050f2e;
+    --navy-panel:#081a44;
+    --blue-line:#1b3f8c;
+    --gold:#e8b84b;
+    --gold-bright:#ffd873;
+    --gold-dim:#8a6e26;
+    --text:#eaf0ff;
+    --text-dim:#7f8dbf;
+    --danger:#d94f4f;
+    --danger-bright:#ff6b6b;
+    --ok:#4fd987;
+    --radius:3px;
+    --mono: 'Courier New', ui-monospace, monospace;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background:
+      radial-gradient(ellipse at 50% -10%, #0b1f56 0%, var(--navy-deep) 55%),
+      var(--navy-deep);
+    color:var(--text);
+    font-family:'Segoe UI', Arial, sans-serif;
+    min-height:100vh;
+  }
+
+  /* faint diamond/spotlight texture reminiscent of the WWTBAM set */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(232,184,75,0.02) 0 2px, transparent 2px 40px),
+      repeating-linear-gradient(-45deg, rgba(232,184,75,0.02) 0 2px, transparent 2px 40px);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{
+    position:relative; z-index:1;
+    max-width:1180px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    border-bottom:1px solid var(--blue-line);
+    padding-bottom:16px;
+    margin-bottom:22px;
+  }
+
+  header .brand{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+  }
+
+  header h1{
+    margin:0;
+    font-size:22px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--gold-bright);
+    text-shadow:0 0 18px rgba(232,184,75,0.35);
+  }
+
+  header .subtitle{
+    color:var(--text-dim);
+    font-size:12px;
+    letter-spacing:0.05em;
+  }
+
+  #linkStatus{
+    display:flex; align-items:center; gap:8px;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+  }
+  #linkDot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--gold-dim);
+    box-shadow:0 0 6px var(--gold-dim);
+    transition:background .15s, box-shadow .15s;
+  }
+  #linkDot.pulse{
+    background:var(--gold-bright);
+    box-shadow:0 0 10px var(--gold-bright), 0 0 20px var(--gold-bright);
+  }
+
+  /* ---- layout of sections ---- */
+  .grid{
+    display:grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap:18px;
+  }
+  @media (max-width: 880px){
+    .grid{ grid-template-columns: 1fr; }
+  }
+
+  section.panel{
+    background:linear-gradient(180deg, var(--navy-panel), #061334);
+    border:1px solid var(--blue-line);
+    border-radius:var(--radius);
+    padding:16px 16px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  section.panel::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0;
+    width:3px;
+    background:linear-gradient(180deg, var(--gold), transparent 85%);
+  }
+
+  section.panel h2{
+    margin:0 0 4px;
+    font-size:12px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--gold);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  section.panel h2 .hint{
+    font-size:10px;
+    letter-spacing:0.04em;
+    color:var(--text-dim);
+    text-transform:none;
+  }
+
+  .btn-row{
+    display:grid;
+    gap:8px;
+    margin-top:12px;
+  }
+  .cols-2{ grid-template-columns:1fr 1fr; }
+  .cols-4{ grid-template-columns:repeat(4,1fr); }
+
+  button.key{
+    appearance:none;
+    border:1px solid var(--blue-line);
+    background:#0a1c4a;
+    color:var(--text);
+    padding:11px 10px;
+    border-radius:var(--radius);
+    font-size:12.5px;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    text-align:left;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    transition:transform .05s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+  }
+  button.key .k{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--gold-dim);
+    letter-spacing:0.06em;
+  }
+  button.key .label{
+    font-weight:600;
+  }
+  button.key:hover{
+    border-color:var(--gold-dim);
+    background:#0d2258;
+  }
+  button.key:active{
+    transform:translateY(1px) scale(0.98);
+    background:var(--gold);
+    color:#1a1200;
+    border-color:var(--gold-bright);
+    box-shadow:0 0 16px rgba(232,184,75,0.55);
+  }
+  button.key:active .k{ color:#1a1200; }
+
+  button.key.danger{ border-color:#5c2222; }
+  button.key.danger:hover{ border-color:var(--danger); }
+  button.key.danger:active{
+    background:var(--danger);
+    border-color:var(--danger-bright);
+    color:#1a0505;
+    box-shadow:0 0 16px rgba(217,79,79,0.55);
+  }
+  button.key.danger .k{ color:#a45a5a; }
+  button.key.danger:active .k{ color:#1a0505; }
+
+  button.key.ok:active{
+    background:var(--ok);
+    border-color:var(--ok);
+    color:#052012;
+    box-shadow:0 0 16px rgba(79,217,135,0.5);
+  }
+
+  button.key:disabled{
+    opacity:0.32;
+    cursor:not-allowed;
+    filter:grayscale(0.6);
+  }
+  button.key:disabled:hover{
+    border-color:var(--blue-line);
+    background:#0a1c4a;
+  }
+
+  #lockToggle.locked{
+    border-color:var(--danger);
+    background:rgba(217,79,79,0.12);
+  }
+  #lockToggle.locked .k{ color:var(--danger-bright); }
+
+  /* progress mini-readout for stepped sequences */
+  .seq-note{
+    margin-top:10px;
+    font-size:10.5px;
+    color:var(--text-dim);
+    line-height:1.5;
+    border-top:1px dashed rgba(127,141,191,0.25);
+    padding-top:8px;
+  }
+
+  /* answer lock grid, styled like the answer strap letters */
+  .answer-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-top:12px;
+  }
+  .answer-grid button{
+    aspect-ratio:1.4/1;
+    font-size:20px;
+    font-weight:800;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+  }
+  .answer-grid button .letter{ font-size:22px; }
+  .answer-grid button .k{ margin-top:2px; }
+
+  footer{
+    margin-top:26px;
+    color:var(--text-dim);
+    font-size:11px;
+    line-height:1.6;
+    border-top:1px solid var(--blue-line);
+    padding-top:14px;
+  }
+  footer code{
+    background:#0a1c4a;
+    padding:1px 5px;
+    border-radius:2px;
+    color:var(--gold);
+    font-family:var(--mono);
+  }
+
+  .toast{
+    position:fixed;
+    bottom:18px; left:50%;
+    transform:translate(-50%, 20px);
+    background:#0a1c4a;
+    border:1px solid var(--gold-dim);
+    color:var(--gold-bright);
+    padding:10px 18px;
+    border-radius:var(--radius);
+    font-size:12px;
+    letter-spacing:0.04em;
+    opacity:0;
+    transition:opacity .18s ease, transform .18s ease;
+    pointer-events:none;
+    z-index:10;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translate(-50%, 0);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <h1>Hot Seat Control</h1>
+      <span class="subtitle">remote panel · broadcasts via <code>sharedKeyEvent</code></span>
+    </div>
+    <div id="linkStatus"><span id="linkDot"></span><span id="linkText">idle</span></div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT COLUMN: primary show flow -->
+    <div style="display:flex; flex-direction:column; gap:18px;">
+
+      <section class="panel">
+        <h2>Sequence Keys <span class="hint">arrow keys — main flow</span></h2>
+        <div class="btn-row cols-2">
+          <button class="key" data-key="37"><span class="label">◀ Money Tree / FF Step</span><span class="k">Left Arrow · 37</span></button>
+          <button class="key" data-key="39"><span class="label">▶ Advance Question</span><span class="k">Right Arrow · 39</span></button>
+          <button class="key" data-key="38"><span class="label">▲ Glint / Preview Level</span><span class="k">Up Arrow · 38</span></button>
+          <button class="key" data-key="40"><span class="label">▼ Total Prize Money</span><span class="k">Down Arrow · 40</span></button>
+        </div>
+        <div class="seq-note">Left steps through Fastest Finger &amp; money-tree intro beats. Right steps through reveal → lock → correct/wrong → next level.</div>
+      </section>
+
+      <section class="panel">
+        <h2>Lock In Final Answer <span class="hint">1–4</span></h2>
+        <div class="answer-grid">
+          <button class="key ok" data-key="49"><span class="letter">A</span><span class="k">1</span></button>
+          <button class="key ok" data-key="50"><span class="letter">B</span><span class="k">2</span></button>
+          <button class="key ok" data-key="51"><span class="letter">C</span><span class="k">3</span></button>
+          <button class="key ok" data-key="52"><span class="letter">D</span><span class="k">4</span></button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Lifelines</h2>
+        <div class="btn-row cols-2">
+          <button class="key" data-key="70"><span class="label">50:50</span><span class="k">F · pulse / reveal / disable</span></button>
+          <button class="key" data-key="65"><span class="label">Ask the Audience</span><span class="k">A · vote sequence</span></button>
+          <button class="key" data-key="80"><span class="label">Phone a Friend</span><span class="k">P · clock sequence</span></button>
+          <button class="key" data-key="83"><span class="label">Switch the Question</span><span class="k">S · stq sequence</span></button>
+        </div>
+        <div class="seq-note">Each lifeline button is a stepped sequence — press repeatedly to advance start → active → resolve → disable, same as the keyboard.</div>
+        <div class="btn-row cols-4" style="margin-top:10px;">
+          <button class="key" data-key="82"><span class="label">50:50 Enable</span><span class="k">R</span></button>
+          <button class="key" data-key="84"><span class="label">PAF Enable</span><span class="k">T</span></button>
+          <button class="key" data-key="89"><span class="label">ATA Enable</span><span class="k">Y</span></button>
+          <button class="key" data-key="73"><span class="label">STQ Enable</span><span class="k">I</span></button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT COLUMN: show control & straps -->
+    <div style="display:flex; flex-direction:column; gap:18px;">
+
+      <section class="panel">
+        <h2>Show Control</h2>
+        <div class="btn-row cols-2">
+          <button class="key" data-key="67"><span class="label">Commercial In/Out</span><span class="k">C</span></button>
+          <button class="key" data-key="81"><span class="label">Game Resume Sound</span><span class="k">Q</span></button>
+          <button class="key" data-key="69"><span class="label">Explain Rules Sound</span><span class="k">E</span></button>
+          <button class="key danger" data-key="71"><span class="label">Game Over</span><span class="k">G</span></button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Straps &amp; Overlays</h2>
+        <div class="btn-row cols-2">
+          <button class="key" data-key="76"><span class="label">Lifeline Strap</span><span class="k">L</span></button>
+          <button class="key" data-key="77"><span class="label">Money Level Strap</span><span class="k">M</span></button>
+          <button class="key" data-key="78"><span class="label">Name Strap</span><span class="k">N</span></button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Corrections</h2>
+        <div class="btn-row cols-2">
+          <button class="key danger" data-key="85"><span class="label">Undo Final Answer</span><span class="k">U</span></button>
+          <button class="key danger" data-key="87"><span class="label">Walk Away</span><span class="k">W</span></button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Host Information <span class="hint">free text → hostinformationDiv</span></h2>
+        <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+          <button class="key" id="lockToggle" style="justify-content:center; align-items:center; text-align:center;">
+            <span class="label" id="lockLabel">🔓 Lock Panel to Type</span>
+            <span class="k" id="lockSub">key buttons stay live</span>
+          </button>
+          <textarea id="hostInfoInput" rows="3" placeholder="Type a note for the host…"
+            style="width:100%; resize:vertical; background:#0a1c4a; border:1px solid var(--blue-line); border-radius:var(--radius); color:var(--text); font-family:inherit; font-size:13px; padding:10px; outline:none;"></textarea>
+          <div style="display:flex; gap:8px;">
+            <button class="key ok" id="hostInfoSend" style="flex:1; justify-content:center; align-items:center; text-align:center;">
+              <span class="label">Send to Host</span><span class="k">Enter also sends</span>
+            </button>
+            <button class="key danger" id="hostInfoClear" style="flex:0 0 96px; justify-content:center; align-items:center; text-align:center;">
+              <span class="label">Clear</span><span class="k">blanks it</span>
+            </button>
+          </div>
+        </div>
+        <div class="seq-note">Sends instantly as you'd expect from a live cue — press <strong>Send to Host</strong> (or Ctrl/Cmd+Enter in the box) and it appears in <code>.infoTd</code> on the engine page. Clear wipes the message from the display. <strong>Lock Panel</strong> disables every key button and stops keystrokes from triggering cues, so letters like A/C/F/S/W type normally instead of firing lifelines. Focusing the textarea locks automatically; it unlocks when you click away or press Lock again.</div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer>
+    Every key button writes to <code>localStorage['sharedKeyEvent']</code> — the exact same channel your existing
+    <code>window.addEventListener('storage', …)</code> listener already consumes, so no changes are needed on the
+    game engine page for those. Open this panel in its own tab/window alongside the controller page and keep both
+    on the same origin (localStorage is per-origin).
+    <br><br>
+    The <strong>Host Information</strong> box is a new channel, <code>localStorage['hostInfoMessage']</code>, that
+    your engine page doesn't listen for yet. Add this once, anywhere your other <code>storage</code> listeners live:
+    <pre style="background:#0a1c4a; border:1px solid var(--blue-line); border-radius:3px; padding:10px 12px; overflow-x:auto; color:var(--text); font-family:var(--mono); font-size:11.5px; margin-top:8px;">window.addEventListener("storage", function(e) {
+    if (e.key === "hostInfoMessage") {
+        const data = JSON.parse(e.newValue);
+        $('.hostinformationDiv .infoTd').text(data.text);
+    }
+});</pre>
+    That's it — whatever you type and send appears in <code>.infoTd</code> immediately, and Clear wipes it.
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const dot = document.getElementById('linkDot');
+  const linkText = document.getElementById('linkText');
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+
+  function flashDot(){
+    dot.classList.add('pulse');
+    clearTimeout(dot._t);
+    dot._t = setTimeout(()=>dot.classList.remove('pulse'), 220);
+  }
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toast.classList.remove('show'), 900);
+  }
+
+  // Broadcast a key press the same way the controller page's own
+  // broadcastKeyPress() does, so the storage listener on the game
+  // engine page picks it up and simulates the keydown.
+  function sendKey(keyCode, label){
+    try{
+      const payload = { keyCode: Number(keyCode), ts: Date.now() };
+      localStorage.setItem('sharedKeyEvent', JSON.stringify(payload));
+      flashDot();
+      linkText.textContent = 'sent ' + label + ' (' + keyCode + ')';
+      showToast(label.toUpperCase() + '  ·  keyCode ' + keyCode);
+    }catch(err){
+      console.error('sendKey error', err);
+      linkText.textContent = 'error — see console';
+    }
+  }
+
+  document.querySelectorAll('button.key[data-key]').forEach(btn=>{
+    const keyCode = btn.getAttribute('data-key');
+    const label = (btn.querySelector('.label')||btn.querySelector('.letter')||btn).textContent.trim();
+    btn.addEventListener('click', ()=> sendKey(keyCode, label));
+  });
+
+  // ---- Host Information message ----
+  // Broadcasts free text to the game engine page via localStorage.
+  // The engine page needs a small listener (see footer note) that
+  // writes the text into .hostinformationDiv .infoTd.
+  function sendHostInfo(text){
+    try{
+      const payload = { text: text, ts: Date.now() };
+      localStorage.setItem('hostInfoMessage', JSON.stringify(payload));
+      flashDot();
+      linkText.textContent = text ? 'sent host note' : 'cleared host note';
+      showToast(text ? 'Sent to host' : 'Host display cleared');
+    }catch(err){
+      console.error('sendHostInfo error', err);
+      linkText.textContent = 'error — see console';
+    }
+  }
+
+  const hostInfoInput = document.getElementById('hostInfoInput');
+  const hostInfoSend = document.getElementById('hostInfoSend');
+  const hostInfoClear = document.getElementById('hostInfoClear');
+  const lockToggle = document.getElementById('lockToggle');
+  const lockLabel = document.getElementById('lockLabel');
+  const lockSub = document.getElementById('lockSub');
+
+  let isLocked = false;
+  const allKeyButtons = () => document.querySelectorAll('button.key[data-key]');
+
+  function setLocked(locked){
+    isLocked = locked;
+    allKeyButtons().forEach(b => b.disabled = locked);
+    lockToggle.classList.toggle('locked', locked);
+    lockLabel.textContent = locked ? '🔒 Panel Locked' : '🔓 Lock Panel to Type';
+    lockSub.textContent = locked ? 'click to unlock' : 'key buttons stay live';
+    linkText.textContent = locked ? 'typing mode on' : 'ready';
+  }
+
+  lockToggle.addEventListener('click', ()=> setLocked(!isLocked));
+  hostInfoInput.addEventListener('focus', ()=> setLocked(true));
+  hostInfoInput.addEventListener('blur', ()=> setLocked(false));
+
+  hostInfoSend.addEventListener('click', ()=>{
+    sendHostInfo(hostInfoInput.value);
+  });
+  hostInfoClear.addEventListener('click', ()=>{
+    hostInfoInput.value = '';
+    sendHostInfo('');
+  });
+  hostInfoInput.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+      e.preventDefault();
+      sendHostInfo(hostInfoInput.value);
+    }
+  });
+
+  // Optional: mirror physical keyboard presses made while this panel
+  // is focused, so the operator can also just type on this page.
+  const trackedCodes = new Set(
+    Array.from(document.querySelectorAll('button.key')).map(b => Number(b.getAttribute('data-key')))
+  );
+  document.addEventListener('keydown', function(e){
+    if (isLocked || document.activeElement === hostInfoInput) return;
+    if (trackedCodes.has(e.keyCode)){
+      const btn = document.querySelector('button.key[data-key="'+e.keyCode+'"]');
+      if(btn){
+        btn.dispatchEvent(new Event('click'));
+        btn.style.transform = 'scale(0.97)';
+        setTimeout(()=> btn.style.transform = '', 90);
+      }
+    }
+  });
+
+  linkText.textContent = 'ready';
+})();
+</script>
+
+</body>
+</html>

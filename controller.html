@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Millionaire Game Controller</title>
+  
+  <link rel="shortcut icon" href="Images/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="Images/favicon.ico" type="image/x-icon">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: auto;
+    }
+
+    /* Khung full màn hình giữ chuẩn tỷ lệ 16:9 */
+    .app-container {
+      width: 100vw;
+      height: 56.25vw; /* Tỷ lệ 16:9 dựa trên chiều rộng */
+      max-height: 100vh;
+      max-width: 177.78vh; /* Tỷ lệ 16:9 dựa trên chiều cao */
+      background-color: #d4d4d4;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 8px;
+    }
+
+    /* Standard Button & Group Box Styles */
+    button {
+      border: 1px solid #707070;
+      background: #e1e1e1;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 4px 6px;
+      user-select: none;
+    }
+    button:active { background: #ccc; }
+
+    fieldset {
+      border: 1px solid #a0a0a0;
+      padding: 6px;
+      background: #e6e6e6;
+    }
+    legend {
+      font-size: 11px;
+      padding: 0 4px;
+      font-weight: bold;
+    }
+
+    /* Row 1 Layout */
+    .top-row {
+      display: grid;
+      grid-template-columns: 140px 220px 260px 1fr;
+      gap: 8px;
+    }
+
+    .left-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .btn-blue { background-color: #0000ff; color: white; border: none; }
+    .btn-dark { background-color: #404040; color: white; }
+    .btn-red-orange { background-color: #ff4500; color: white; }
+    .btn-risk { background-color: #ff9900; color: black; font-weight: bold; margin-top: auto; }
+
+    /* Lifelines */
+    .lifelines-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+    .icon-box {
+      background: black;
+      color: white;
+      border-radius: 50%;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 2px;
+      cursor: pointer;
+    }
+
+    /* Money Tree */
+    .btn-green { background-color: #00ff00; }
+    .btn-ping { background-color: #404040; color: white; font-size: 9px; }
+    .btn-purple { background-color: #8080ff; color: white; }
+
+    /* Main Section Controls */
+    .main-section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 85px;
+      gap: 4px;
+    }
+    .btn-cyan { background-color: #00ffff; }
+    .btn-teal { background-color: #008080; color: white; }
+    .btn-orange { background-color: #ff8000; color: black; }
+    .btn-red { background-color: #ff0000; color: white; }
+    .btn-yellow { background-color: #ffff00; }
+
+    /* Row 2: Question & Options */
+    .question-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .question-box {
+      background: #c0c0c0;
+      min-height: 55px;
+      border: 1px solid #808080;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #000;
+      display: flex;
+      align-items: center;
+    }
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 35px 1fr 1fr 35px;
+      gap: 6px;
+      align-items: center;
+    }
+    .ans-label {
+      background: black;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    .ans-box {
+      background: #c0c0c0;
+      min-height: 36px;
+      border: 1px solid #808080;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #000;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    /* Row 3: Bottom Panels */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      flex: 1;
+    }
+
+    /* Host Messages */
+    .host-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .message-display {
+      flex: 1;
+      background: white;
+      border: 1px solid #808080;
+      padding: 6px;
+      font-size: 12px;
+      min-height: 40px;
+      overflow-y: auto;
+    }
+    .message-input {
+      display: flex;
+      gap: 4px;
+    }
+
+    /* Status & Score Panel */
+    .right-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .status-grid {
+      display: grid;
+      grid-template-columns: 50px 80px 40px 80px;
+      gap: 4px;
+      align-items: center;
+    }
+    .stat-green { background: #00ff00; padding: 2px 4px; font-weight: bold; }
+    .stat-red { background: #ff0000; color: white; padding: 2px 4px; font-weight: bold; }
+    .stat-orange { background: #ff8000; padding: 2px 4px; font-weight: bold; }
+    .stat-cyan { background: #00ffff; padding: 2px 4px; font-weight: bold; }
+    .stat-blue { background: #0000ff; color: white; padding: 2px 4px; font-weight: bold; }
+    
+    .question-info {
+      background: white;
+      border: 1px solid #808080;
+      height: 100%;
+      padding: 6px;
+      font-size: 12px;
+      overflow-y: auto;
+    }
+  </style>
+
+  <script type="text/javascript">
+    window.isControllerPage = true;
+  </script>
+  <script type="text/javascript" src="jquery-2.1.1.min.js"></script>
+  <script type="text/javascript" src="jquery.3d.js"></script>
+  <script type="text/javascript" src="accounting.js"></script>
+  <script type="text/javascript" src="Variables.js"></script>
+  <script type="text/javascript" src="CameraControl.js"></script>
+  <script type="text/javascript" src="AudioControl.js"></script>
+  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="linking.js"></script>
+  <script type="text/javascript" src="FastestFingerControl.js"></script>
+  <script type="text/javascript" src="GeneralControl.js"></script>
+  <script type="text/javascript" src="videobg.js"></script>
+  <script type="text/javascript" src="QuestionAndAnswerControl.js"></script>
+  <script type="text/javascript" src="WinningsControl.js"></script>
+  <script type="text/javascript" src="MoneyTreeControl.js"></script>
+  <script type="text/javascript" src="LifelineControl.js"></script>
+  <script type="text/javascript" src="ContestantsControl.js"></script>
+  <script type="text/javascript" src="Init.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- NAV BAR FOR LINKING ALL INTERFACES -->
+  <div style="display: flex; gap: 8px; background: #1a1a2e; padding: 6px 12px; border-radius: 4px; align-items: center; justify-content: space-between; border: 1px solid #333;">
+    <div style="color: #00ffcc; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+      <span>🏆</span> <span>Ai Là Triệu Phú - Controller & Sync Center</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <a href="/controller.html" target="_blank" style="color: #fff; background: #0055ff; padding: 4px 10px; border-radius: 3px; text-decoration: none; font-weight: bold;">🎛️ Controller</a>
+      <a href="/host.html" target="_blank" style="color: #fff; background: #28a745; padding: 4px 10px; border-radius: 3px; text-decoration: none; font-weight: bold;">🎙️ Host</a>
+      <a href="/player.html" target="_blank" style="color: #fff; background: #fd7e14; padding: 4px 10px; border-radius: 3px; text-decoration: none; font-weight: bold;">🧑‍🎓 Player</a>
+      <a href="/default.html" target="_blank" style="color: #fff; background: #6f42c1; padding: 4px 10px; border-radius: 3px; text-decoration: none; font-weight: bold;">📺 Viewer (Default)</a>
+    </div>
+  </div>
+
+  <!-- TOP ROW: Controls & Lifelines -->
+  <div class="top-row">
+    <!-- Media Buttons -->
+    <div class="left-controls">
+      <button class="btn-blue" id="btnOpening">Opening</button>
+      <button class="btn-dark" id="btnResetGame">Reset Game</button>
+      <button class="btn-blue" id="btnCommercial">Commercial</button>
+      <button class="btn-red-orange" id="btnToHotSeat">To Hot Seat</button>
+      <button class="btn-blue" id="btnClosing">Closing</button>
+    </div>
+
+    <!-- Lifelines -->
+    <fieldset>
+      <legend>Lifelines</legend>
+      <div class="lifelines-grid">
+        <div>
+          <div class="icon-box" id="btnLifeline5050">50:50</div>
+          <label><input type="checkbox" id="chk5050" checked> Unused</label>
+        </div>
+        <div>
+          <div class="icon-box" id="btnLifelinePlus1">+1</div>
+          <label><input type="checkbox" id="chkPlus1" checked> Unused</label>
+        </div>
+        <div>
+          <div class="icon-box" id="btnLifelineATA">👥</div>
+          <label><input type="checkbox" id="chkATA" checked> Unused</label>
+        </div>
+        <div>
+          <div class="icon-box" id="btnLifelinePAF">x2</div>
+          <label><input type="checkbox" id="chkPAF"> Unused</label>
+        </div>
+      </div>
+      <div style="margin-top: 6px; font-size: 11px;" id="ataScores">
+        ATA<br>
+        A: <span id="ataA">0</span> &nbsp; B: <span id="ataB">0</span><br>
+        C: <span id="ataC">0</span> &nbsp; D: <span id="ataD">0</span>
+      </div>
+    </fieldset>
+
+    <!-- Money Tree -->
+    <fieldset>
+      <legend>Money Tree</legend>
+      <div style="display: flex; flex-direction: column; gap: 6px; height: 100%;">
+        <div style="display: flex; gap: 4px;">
+          <button class="btn-green" id="btnTreeShow" style="flex:1;">Show</button>
+          <button class="btn-green" id="btnTreeHide" style="flex:1;">Hide</button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px;">
+            <button class="btn-ping" id="btnLL1Ping">LL1 PING</button>
+            <button class="btn-ping" id="btnLL2Ping">LL2 PING</button>
+            <button class="btn-ping" id="btnLL3Ping">LL3 PING</button>
+            <button class="btn-ping" id="btnLL4Ping">LL4 PING</button>
+          </div>
+        </div>
+        <div style="display: flex; gap: 4px; margin-top: auto;">
+          <button class="btn-purple" id="btnExplainRules" style="flex: 1;">Explain Rules</button>
+          <button class="btn-purple" id="btnProgAnim" style="flex: 1;">PROG. ANIM</button>
+          <button class="btn-purple" id="btnResetTree" style="flex: 1;">RESET TREE</button>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Main Section -->
+    <fieldset>
+      <legend>Main</legend>
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <button class="btn-risk" id="btnRiskMode">RISK MODE OFF</button>
+        <div class="main-section-grid">
+          <button class="btn-cyan" id="btnLightsDown">Lights Down</button>
+          <button class="btn-cyan" id="btnReveal">Reveal</button>
+          <button class="btn-orange" id="btnWalkAway">Walk Away</button>
+          
+          <button class="btn-teal" id="btnQuestion" style="grid-column: span 2;">Question</button>
+          <button class="btn-red" id="btnByeBye">Bye Bye</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+          <label><input type="checkbox" id="chkShowCorrect"> Show Correct</label>
+          <button class="btn-yellow" id="btnUndo" style="border-radius: 50%; width: 25px; height: 25px;">↻</button>
+        </div>
+        <div>
+          Current Money Tree level: <input type="number" id="inputLevel" value="0" style="width: 45px;">
+        </div>
+      </div>
+    </fieldset>
+  </div>
+
+  <!-- MIDDLE ROW: Question & Options -->
+  <div class="question-section">
+    <div class="question-box">A sample question will go here...</div>
+    <div class="answers-grid">
+      <div class="ans-label" id="labelAnsA">A</div>
+      <div class="ans-box" id="ctrlAnsA">Answer for A Goes Here...</div>
+      <div class="ans-box" id="ctrlAnsB">Answer for B Goes Here...</div>
+      <div class="ans-label" id="labelAnsB">B</div>
+      <div class="ans-label" id="labelAnsC">C</div>
+      <div class="ans-box" id="ctrlAnsC">Answer for C Goes Here...</div>
+      <div class="ans-box" id="ctrlAnsD">Answer for D Goes Here...</div>
+      <div class="ans-label" id="labelAnsD">D</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW: Host Messages & Status -->
+  <div class="bottom-row">
+    <!-- Host Messages -->
+    <fieldset class="host-messages">
+      <legend>Host Messages</legend>
+      <div class="message-display" id="msgDisplay"></div>
+      <div class="message-input">
+        <button id="btnClearMsg">Clear Messages</button>
+        <input type="text" id="hostMsgSelect" placeholder="Type message for host..." style="flex: 1; padding: 3px; border: 1px solid #808080;" />
+        <button id="btnSendMsg">Send to Host</button>
+      </div>
+    </fieldset>
+
+    <!-- Status & TV -->
+    <div class="right-bottom">
+      <div class="status-grid">
+        <span>Correct</span><div class="stat-green">100</div>
+        <span>Drop</span><div class="stat-cyan">0</div>
+        <span>Wrong</span><div class="stat-red">0</div>
+        <span>QLeft</span><div class="stat-blue">15</div>
+        <span>Current</span><div class="stat-orange">0</div>
+      </div>
+
+      <fieldset style="flex: 1; display: flex; flex-direction: column;">
+        <legend>Question info</legend>
+        <div class="question-info"></div>
+      </fieldset>
+
+      <fieldset style="display: flex; gap: 15px;">
+        <legend>TV</legend>
+        <label><input type="checkbox" id="chkTVShowQuestion" checked> Show Question</label>
+        <label><input type="checkbox" id="chkTVShowScore" checked> Show Total Score</label>
+      </fieldset>
+    </div>
+  </div>
+
+  <!-- Audio Control Footer -->
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <input type="checkbox" id="chkAudioMute">
+    <button id="btnStopAudio" style="background: red; color: white; padding: 2px 8px;">STOP AUDIO</button>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  // Prevent physical keyboard shortcuts from triggering actions on controller
+  $(document).keydown(function(e) {
+    if (!$(e.target).is('input, textarea')) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+
+  function triggerKey(keyCode) {
+    if (typeof window.broadcastKeyPress === 'function') {
+      window.broadcastKeyPress(keyCode);
+    }
+  }
+
+  // Buttons wiring:
+  $('#btnOpening').click(function() { triggerKey(79); }); // Opening plays main_theme.mp3
+  $('#btnResetGame').click(function() { triggerKey(71); }); // Game Over / Reset
+  $('#btnCommercial').click(function() { triggerKey(67); }); // Commercial
+  $('#btnToHotSeat').click(function() { triggerKey(37); }); // Money Tree / Sequence
+  $('#btnClosing').click(function() { triggerKey(71); }); // Closing
+
+  // Lifelines:
+  $('#btnLifeline5050').click(function() { triggerKey(70); }); // F
+  $('#btnLifelinePlus1').click(function() { triggerKey(83); }); // S
+  $('#btnLifelineATA').click(function() { triggerKey(65); }); // A
+  $('#btnLifelinePAF').click(function() { triggerKey(80); }); // P
+
+  $('#btnLL1Ping').click(function() { triggerKey(82); }); // R
+  $('#btnLL2Ping').click(function() { triggerKey(84); }); // T
+  $('#btnLL3Ping').click(function() { triggerKey(89); }); // Y
+  $('#btnLL4Ping').click(function() { triggerKey(73); }); // I
+
+  // Money Tree:
+  $('#btnTreeShow, #btnTreeHide, #btnProgAnim').click(function() { triggerKey(37); }); // Left Arrow
+  $('#btnExplainRules').click(function() { triggerKey(69); }); // E
+  $('#btnResetTree').click(function() { triggerKey(71); }); // G
+
+  // Main Section:
+  $('#btnLightsDown').click(function() { triggerKey(39); }); // Right Arrow
+  $('#btnReveal').click(function() { triggerKey(39); }); // Right Arrow
+  $('#btnQuestion').click(function() { triggerKey(39); }); // Right Arrow
+  $('#btnWalkAway').click(function() { triggerKey(87); }); // W
+  $('#btnByeBye').click(function() { triggerKey(71); }); // G
+  $('#btnUndo').click(function() { triggerKey(85); }); // U
+
+  // Answer selections (Lock in 1-4)
+  $('#labelAnsA, #ctrlAnsA').click(function() { triggerKey(49); }); // 1
+  $('#labelAnsB, #ctrlAnsB').click(function() { triggerKey(50); }); // 2
+  $('#labelAnsC, #ctrlAnsC').click(function() { triggerKey(51); }); // 3
+  $('#labelAnsD, #ctrlAnsD').click(function() { triggerKey(52); }); // 4
+
+  // Host Message
+  $('#btnSendMsg').click(function() {
+    var txt = $('#hostMsgSelect').val();
+    if (typeof window.broadcastHostNote === 'function') {
+      window.broadcastHostNote(txt);
+    }
+  });
+  $('#hostMsgSelect').keydown(function(e) {
+    if (e.keyCode === 13) {
+      var txt = $(this).val();
+      if (typeof window.broadcastHostNote === 'function') {
+        window.broadcastHostNote(txt);
+      }
+    }
+  });
+  $('#btnClearMsg').click(function() {
+    $('#hostMsgSelect').val('');
+    if (typeof window.broadcastHostNote === 'function') {
+      window.broadcastHostNote('');
+    }
+  });
+
+  // Stop Audio - broadcast key 88 to stop audio on default.html
+  $('#btnStopAudio').click(function() {
+    triggerKey(88);
+  });
+
+  // Level input change
+  $('#inputLevel').change(function() {
+    var lvl = parseInt($(this).val()) || 1;
+    if (typeof window.broadcastLevelChange === 'function') {
+      window.broadcastLevelChange(lvl);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

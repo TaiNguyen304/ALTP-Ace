@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script src="Variables.js"></script>
+<title>WWTBAM Logo — Video Wall</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden;
+    background: #000; display: flex; align-items: center; justify-content: center;
+  }
+
+  video.bg {
+    position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    z-index: 0; transition: opacity 1s ease;
+  }
+
+  /* ── 3D Scene ── */
+  .scene {
+    perspective: 1000px;
+    z-index: 1;
+    position: relative;
+  }
+
+  .logo-container {
+    position: relative;
+    width: 750px;
+    height: 750px;
+    transform-style: preserve-3d;
+    transform-origin: center;
+    transition: transform 1.2s ease-in-out;
+    --scale: 1;
+  }
+
+  /* ── Logo Faces ── */
+  .logo-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+  }
+  .logo-face.front  { transform: rotateY(0deg); }
+  .logo-face.middle { transform: rotateY(180deg); }
+  .logo-face.back   { transform: rotateY(360deg); z-index: -1; }
+
+  .logo-container.flipped {
+    transform: rotateY(-360deg) scale(var(--scale));
+    transition: transform 1.6s ease-in-out;
+  }
+  .logo-container:not(.flipped) {
+    transform: rotateY(0deg) scale(var(--scale));
+  }
+
+  /* ── Images ── */
+  .logo-container img {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: contain; transform-origin: center center;
+    transition: opacity 0.4s linear;
+    pointer-events: none;
+    backface-visibility: hidden;
+  }
+
+  #qmark-wrap {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    transform-origin: center center;
+    transition: transform 0.8s ease;
+    pointer-events: none;
+  }
+
+  /* ── Back Face ── */
+  .back-prize,
+  .back-strap {
+    position: absolute; top: 0; left: 0;
+    width: 110%; height: 110%;
+    object-fit: contain;
+  }
+
+  .back-strap {
+    opacity: 0;
+    scale: 110%;
+    transform: scale(0);
+    transition: none;
+    pointer-events: none;
+  }
+
+  /* ── Prize / Winner Text ── */
+  .prize-text {
+    position: absolute;
+    bottom: 43%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: CopperplateBold, Copperplate, Georgia, serif;
+    font-size: 85px;
+    color: white;
+    font-weight: bold;
+    text-shadow: #000000c0 6px 6px 8px;
+    letter-spacing: 2px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ── Front Winner Strap Overlay ── */
+  .front-strap-wrap {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .front-strap {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    scale: 110%;
+    transform: scale(0);
+    pointer-events: none;
+  }
+
+  .front-prize-text {
+    position: absolute;
+    bottom: 43%;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    font-family: CopperplateBold, Copperplate, Georgia, serif;
+    font-size: 85px;
+    color: white;
+    font-weight: bold;
+    text-shadow: #000000c0 6px 6px 8px;
+    letter-spacing: 2px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ── Spin ── */
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .spin { animation: spin 100s linear infinite; }
+
+  /* ── Grow / Shrink ── */
+  @keyframes textGrow     { 0%{transform:scale(1)} 40%{transform:scale(1.17)} 100%{transform:scale(1)} }
+  @keyframes questionShrink { 0%{transform:scale(1)} 40%{transform:scale(0.85)} 100%{transform:scale(1)} }
+
+  /* ── Hot Seat ── */
+  @keyframes hotSeatText  { 0%{transform:scale(1)} 40%{transform:scale(1.3)} 100%{transform:scale(1)} }
+  @keyframes hotSeatQmark { 0%{transform:rotate(0deg)} 100%{transform:rotate(-360deg) scale(1)} }
+
+  /* ── Strap / Prize Zoom Animations ── */
+  @keyframes strapZoomIn {
+    0%   { transform: scale(0); opacity: 0; }
+    80%  { transform: scale(1.13); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes strapZoomOut {
+    0%   { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+  }
+  @keyframes prizeZoomIn {
+    0%   { transform: translateX(-50%) scale(0); opacity: 0; }
+    80%  { transform: translateX(-50%) scale(1.13); opacity: 1; }
+    100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  }
+  @keyframes prizeZoomOut {
+    0%   { transform: translateX(-50%) scale(1); opacity: 1; }
+    100% { transform: translateX(-50%) scale(0); opacity: 0; }
+  }
+
+  /* Front strap zoom (uses scale only, not translateX) */
+  @keyframes frontStrapZoomIn {
+    0%   { transform: scale(0); opacity: 0; }
+    80%  { transform: scale(1.13); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes frontStrapZoomOut {
+    0%   { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+  }
+  @keyframes frontPrizeZoomIn {
+    0%   { transform: translateX(-50%) scale(0); opacity: 0; }
+    80%  { transform: translateX(-50%) scale(1.13); opacity: 1; }
+    100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  }
+  @keyframes frontPrizeZoomOut {
+    0%   { transform: translateX(-50%) scale(1); opacity: 1; }
+    100% { transform: translateX(-50%) scale(0); opacity: 0; }
+  }
+
+  /* ── QFFF tilt ── */
+  .qfff-tilt { transform: rotate(-10deg); }
+
+  /* ── Controls ── */
+  .tier-buttons {
+    position: fixed; bottom: 30px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    z-index: 10; justify-content: center;
+    max-width: 95vw;
+  }
+  .tier-buttons button {
+    padding: 8px 14px; font-size: 15px;
+    border: none; border-radius: 6px;
+    cursor: pointer; background: #1a1a1a; color: white;
+    transition: background 0.2s;
+  }
+  .tier-buttons button:hover { background: #444; }
+  .tier-buttons button.winner-btn { background: #7a5c00; }
+  .tier-buttons button.winner-btn:hover { background: #b88a00; }
+  .tier-buttons button.orb-btn { background: #0b3d66; }
+  .tier-buttons button.orb-btn:hover { background: #1665ac; }
+  .tier-buttons button.lifeline-btn { background: #4a1a5c; }
+  .tier-buttons button.lifeline-btn:hover { background: #7c2ba0; }
+</style>
+</head>
+<body>
+
+<!-- Background videos -->
+<video id="video-main" class="bg" autoplay muted loop playsinline src="Images/bg1.mp4"></video>
+<video id="video-next" class="bg" autoplay muted loop playsinline style="opacity:0"></video>
+
+<!-- Chroma key logo video -->
+<video id="logo-chroma-video" src="Images/logosequencev2.mp4" muted playsinline style="display:none"></video>
+<canvas id="logo-chroma-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:2;display:none;pointer-events:none;"></canvas>
+
+<!-- Orb particle canvas -->
+<canvas id="orb-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:5;display:none;pointer-events:none;"></canvas>
+
+<!-- 3D Logo Scene -->
+<div class="scene">
+  <div class="logo-container" id="logo">
+
+    <!-- FRONT FACE -->
+    <div class="logo-face front">
+      <img src="Images/combinedgen.png" id="layer1" alt="">
+      <img src="Images/atomgen.png" class="atom spin" alt="">
+      <div id="qmark-wrap">
+        <img src="Images/qmarkgen.png" id="layer5" alt="">
+      </div>
+      <img src="Images/outertextv2.png" id="layer7" alt="">
+      <img src="Images/textv2.png" id="layer8" alt="">
+
+      <!-- Winner strap overlay (sits on top of front face, hidden by default) -->
+      <div class="front-strap-wrap" id="frontStrapWrap">
+        <img src="Images/strapformoney.png" class="front-strap" id="frontStrap" alt="">
+        <div class="front-prize-text" id="frontPrizeText"></div>
+      </div>
+    </div>
+
+    <!-- MIDDLE FACE (180° flip) -->
+    <div class="logo-face middle">
+      <img src="Images/flipgen.png" class="flip-image" alt="">
+    </div>
+
+    <!-- BACK FACE -->
+    <div class="logo-face back">
+      <img src="Images/prizegen.png" class="back-prize" alt="">
+      <img src="Images/atomgen.png" class="atom spin" alt="">
+      <img src="Images/strapformoney.png" class="back-strap" alt="">
+      <div class="prize-text" id="prizeText">0</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="tier-buttons" id="controls">
+  <button onclick="changeTier('general_int','bg1')">General</button>
+  <button onclick="changeTier('q1_q5','bgq1')">Tier 1</button>
+  <button onclick="changeTier('q6_q10','bgq6')">Tier 2</button>
+  <button onclick="changeTier('q11_q14','bgq11')">Tier 3</button>
+  <button onclick="changeTier('q15','bgq15')">Tier 4</button>
+  <button onclick="changeTier('qfff','wrongbg')">QFFF</button>
+  <button onclick="wrongAnswer()">❌ Wrong</button>
+  <button class="winner-btn" onclick="winnerTier()">🏆 Winner</button>
+  <button onclick="enterHotSeat()">Enter Hot Seat</button>
+  <button onclick="enterHotSeatOnce()">Hot Seat (Once → General)</button>
+  <button onclick="flipLogoRight()">Flip (1–14)</button>
+  <button onclick="toggleLogoScale()">Toggle Scale</button>
+  <button onclick="flipLogoRight(false)">Flip (No Prize)</button>
+  <button onclick="toggleBgLogoMode()">BG / LOGO VIDEO</button>
+  <button onclick="toggleChromaBG()">🟩 Chroma BG</button>
+  <button class="orb-btn" onclick="startOrbs()">✨ Start Orbs</button>
+  <button class="orb-btn" onclick="stopOrbs()">✨ Stop Orbs</button>
+  <button class="lifeline-btn" onclick="triggerLifelineFlipShow('fifty')">50:50 Show</button>
+  <button class="lifeline-btn" onclick="triggerLifelineFlipShow('audience')">Ask Audience Show</button>
+  <button class="lifeline-btn" onclick="triggerLifelineFlipShow('phone')">Phone Friend Show</button>
+  <button class="lifeline-btn" onclick="triggerLifelineFlipShow('switch')">Switch Show</button>
+  <button class="lifeline-btn" onclick="triggerLifelineFlipHide()">📞 Lifeline Flip Hide</button>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let justExitedHotSeat = false;
+let bgLogoMode        = 0;       // 0 = normal, 1 = bg only, 2 = bg + chroma
+let currentTier       = 'general_int';
+let flipCount         = 0;
+let chromaBG          = false;
+let winnerActive      = false;   // tracks whether winner strap is showing
+
+// Wrong-answer prize-drop tracking:
+// When the contestant gets a question wrong, we remember which tier they
+// were on. The NEXT flip that happens while sitting in "general" will show
+// the reduced safety-net amount for that tier, then the flag clears.
+// If no wrong answer happened, flipping in general leaves the prize text
+// exactly as it already was.
+let wrongAnswerActive     = false;
+let wrongAnswerTierAtTime = null;
+
+const imageCache = {};
+const videoCache = {};
+
+/* ══════════════════════════════════════════════
+   TIER / SUFFIX MAP
+══════════════════════════════════════════════ */
+const tierSuffixMap = {
+  general_int : 'gen',
+  q1_q5       : 't1',
+  q6_q10      : 't2',
+  q11_q14     : 't3',
+  q15         : 't4',
+  qfff        : 'fff',
+  wrong       : 'wrong',
+  winner      : 'winner'
+};
+
+const bgs = ['bg1','bgq1','bgq6','bgq11','bgq15','wrongbg','winningbg'];
+
+/* ══════════════════════════════════════════════
+   PRELOAD
+══════════════════════════════════════════════ */
+async function preloadImage(src) {
+  if (imageCache[src]) return;
+  return new Promise(resolve => {
+    const img = new Image();
+    img.src = src;
+    img.onload  = () => resolve(imageCache[src] = img);
+    img.onerror = () => resolve();
+  });
+}
+
+async function preloadVideo(src) {
+  if (videoCache[src]) return;
+  return new Promise(resolve => {
+    const vid = document.createElement('video');
+    vid.src = src; vid.preload = 'auto'; vid.muted = true; vid.playsInline = true;
+    vid.oncanplaythrough = () => resolve(videoCache[src] = vid);
+    vid.onerror = () => resolve();
+    vid.load();
+  });
+}
+
+async function preloadAllAssets() {
+  const p = [];
+  for (const key in tierSuffixMap) {
+    const s = tierSuffixMap[key];
+    p.push(preloadImage(`Images/combined${s}.png`));
+    p.push(preloadImage(`Images/atom${s}.png`));
+    // winner uses qmarkgen, all others use their own qmark
+    if (key !== 'winner') p.push(preloadImage(`Images/qmark${s}.png`));
+    p.push(preloadImage(`Images/prize${s}.png`));
+    p.push(preloadImage(`Images/flip${s}.png`));
+  }
+  p.push(preloadImage('Images/strapformoney.png'));
+  p.push(preloadImage('Images/outertextv2.png'));
+  p.push(preloadImage('Images/textv2.png'));
+  p.push(preloadImage('Images/qmarkgen.png'));
+  for (const bg of bgs) p.push(preloadVideo(`Images/${bg}.mp4`));
+  p.push(preloadVideo('Images/logosequencev2.mp4'));
+  await Promise.all(p);
+  console.log('✅ All assets preloaded');
+}
+
+(async () => { await preloadAllAssets(); })();
+
+/* ══════════════════════════════════════════════
+   BACKGROUND CROSSFADE
+══════════════════════════════════════════════ */
+function fadeBackground(bgName) {
+  const main = document.getElementById('video-main');
+  const next = document.getElementById('video-next');
+  next.src = `Images/${bgName}.mp4`;
+  next.currentTime = 0;
+  next.play().catch(() => {});
+  next.style.opacity = 1;
+  main.style.opacity = 0;
+  setTimeout(() => {
+    main.src = next.src;
+    main.currentTime = next.currentTime;
+    main.style.opacity = 1;
+    next.style.opacity = 0;
+  }, 800);
+}
+
+/* ══════════════════════════════════════════════
+   LAYER FADE (logo image swap)
+══════════════════════════════════════════════ */
+async function fadeLayers(tierName) {
+  const suffix = tierSuffixMap[tierName];
+  if (!suffix) return;
+
+  const qmarkSrc =
+    tierName === 'winner'
+      ? 'Images/qmarkgen.png'
+      : `Images/qmark${suffix}.png`;
+
+  const combinedSrc = `Images/combined${suffix}.png`;
+  const atomSrc     = `Images/atom${suffix}.png`;
+
+  await Promise.all([
+    preloadImage(combinedSrc),
+    preloadImage(atomSrc),
+    preloadImage(qmarkSrc)
+  ]);
+
+  const l1    = document.getElementById('layer1');
+  const qmark = document.getElementById('layer5');
+  const atoms = document.querySelectorAll('.atom');
+
+  const outerText = document.getElementById('layer7');
+  const mainText  = document.getElementById('layer8');
+
+  if (l1) {
+    l1.style.opacity = 0.4;
+    setTimeout(() => {
+      l1.src = combinedSrc;
+      l1.style.opacity = 1;
+    }, 200);
+  }
+
+  atoms.forEach(atom => {
+    atom.style.opacity = 0.4;
+    setTimeout(() => {
+      atom.src = atomSrc;
+      atom.style.opacity = 1;
+    }, 200);
+  });
+
+  if (qmark) {
+    qmark.style.opacity = 0.4;
+    setTimeout(() => {
+      qmark.src = qmarkSrc;
+      qmark.style.opacity = 1;
+    }, 200);
+  }
+
+  // Winner tier hides texts
+  if (tierName === 'winner') {
+    outerText.style.transition = 'opacity 0.5s ease';
+    mainText.style.transition  = 'opacity 0.5s ease';
+
+    outerText.style.opacity = '0';
+    mainText.style.opacity  = '0';
+  } else {
+    outerText.style.transition = 'opacity 0.5s ease';
+    mainText.style.transition  = 'opacity 0.5s ease';
+
+    outerText.style.opacity = '1';
+    mainText.style.opacity  = '1';
+  }
+}
+
+/* ══════════════════════════════════════════════
+   BACK FACE SYNC
+══════════════════════════════════════════════ */
+function setBackFace(tier) {
+  // Winner tier does not use flip/prize assets
+  if (tier === 'winner') return;
+  if (tier === 'qfff') return;
+  if (tier === 'wrong') return;
+
+  const suffix = tierSuffixMap[tier];
+  if (!suffix) return;
+
+  document.querySelector('.back-prize').src =
+    `Images/prize${suffix}.png`;
+
+  const fi = document.querySelector('.flip-image');
+
+  if (fi) {
+    fi.src = `Images/flip${suffix}.png`;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   GROW / SHRINK ANIMATION
+══════════════════════════════════════════════ */
+function setInlineGrowShrink() {
+  const text  = document.getElementById('layer8');
+  const qmark = document.getElementById('layer5');
+  text.style.animation  = 'none'; qmark.style.animation = 'none';
+  void text.offsetWidth; void qmark.offsetWidth;
+  text.style.animation  = 'textGrow 1.4s ease-in-out';
+  qmark.style.animation = 'questionShrink 1.4s ease-in-out';
+  setTimeout(() => { text.style.animation = ''; qmark.style.animation = ''; }, 1450);
+}
+
+/* ══════════════════════════════════════════════
+   CHANGE TIER (normal)
+══════════════════════════════════════════════ */
+function changeTier(tierName, bgName) {
+  // If winner strap is showing, hide it first
+  if (winnerActive) hideWinnerStrap();
+
+  const qwrap = document.getElementById('qmark-wrap');
+  qwrap.classList.remove('qfff-tilt');
+  document.getElementById('layer8').style.animation = '';
+  document.getElementById('layer5').style.animation = '';
+
+  fadeLayers(tierName);
+  fadeBackground(bgName);
+
+  if (tierName !== 'general_int' && !justExitedHotSeat) {
+    setTimeout(setInlineGrowShrink, 120);
+  }
+
+  if (tierName === 'qfff') {
+    setTimeout(() => {
+      qwrap.classList.add('qfff-tilt');
+      setTimeout(() => qwrap.classList.remove('qfff-tilt'), 700);
+    }, 100);
+  }
+
+  currentTier = tierName;
+  setBackFace(tierName);
+}
+
+/* Maps the tier the contestant was on when they got it wrong to the
+   correct "walked away with" safety-net amount, using the same
+   formatting rules as updatePrizeText(). */
+function getWrongAnswerPrizeDisplay(tier) {
+  const gv = window.GameVariables;
+
+  function formatAmount(amount) {
+    return gv.NumberPrefix +
+      new Intl.NumberFormat(gv.LocaleCode, gv.FormatOptions)
+        .format(amount)
+        .replace(gv.ReplaceCharacterBefore, gv.ReplaceCharacterAfter)
+        .trim() +
+      gv.NumberSuffix;
+  }
+
+  // Q1–5 wrong → walked away with nothing
+  if (tier === 'q1_q5') {
+    return gv.UseZeronaireText ? gv.ZeronaireText : formatAmount(0);
+  }
+
+  // Q6–10 wrong → 5th safety-net amount
+  if (tier === 'q6_q10') {
+    if (gv.UseTopPrizeText) {
+      return gv.TopPrizeQuestionNumber > 5
+        ? formatAmount(gv.PrizeAmounts[4])
+        : gv.TopPrizeText[4];
+    }
+    return formatAmount(gv.PrizeAmounts[4]);
+  }
+
+  // Q11–15 wrong → 10th safety-net amount
+  if (tier === 'q11_q14' || tier === 'q15') {
+    if (gv.UseTopPrizeText) {
+      return gv.TopPrizeQuestionNumber > 10
+        ? formatAmount(gv.PrizeAmounts[9])
+        : gv.TopPrizeText[9];
+    }
+    return formatAmount(gv.PrizeAmounts[9]);
+  }
+
+  // Wrong in general_int / qfff / winner — no safety net, nothing to show
+  return formatAmount(0);
+}
+
+/* ══════════════════════════════════════════════
+   WRONG ANSWER
+══════════════════════════════════════════════ */
+function wrongAnswer() {
+  if (winnerActive) hideWinnerStrap();
+
+  document.getElementById('qmark-wrap').classList.remove('qfff-tilt');
+
+  // Remember the tier where the wrong answer happened
+  wrongAnswerTierAtTime = currentTier;
+
+  // Calculate the reduced / safety-net amount
+  const reducedDisplay = getWrongAnswerPrizeDisplay(wrongAnswerTierAtTime);
+
+  const prizeText = document.getElementById('prizeText');
+  const frontPrizeText = document.getElementById('frontPrizeText');
+
+  // Immediately change the displayed prize to the reduced amount
+  if (prizeText) prizeText.textContent = reducedDisplay;
+  if (frontPrizeText) frontPrizeText.textContent = reducedDisplay;
+
+  // Keep this active so the next flip does NOT restore the old prize
+  wrongAnswerActive = true;
+
+  // Reset progression
+  flipCount = 0;
+
+  // Play WRONG screen
+  fadeLayers('wrong');
+  fadeBackground('wrongbg');
+
+  if (!justExitedHotSeat) {
+    setTimeout(setInlineGrowShrink, 120);
+  }
+
+  // After 3 seconds, return to GENERAL
+  setTimeout(() => {
+    fadeLayers('general_int');
+    fadeBackground('bg1');
+
+    // IMPORTANT:
+    // The visual is now General, so the internal tier must also be General.
+    currentTier = 'general_int';
+
+  }, 3000);
+}
+/* ══════════════════════════════════════════════
+   HOT SEAT
+══════════════════════════════════════════════ */
+function enterHotSeat() {
+  const text  = document.getElementById('layer8');
+  const qmark = document.getElementById('layer5');
+  text.style.animation  = 'none'; qmark.style.animation = 'none';
+  void text.offsetWidth; void qmark.offsetWidth;
+  justExitedHotSeat = true;
+  text.style.animation  = 'hotSeatText 2.4s ease-in-out 3';
+  qmark.style.animation = 'hotSeatQmark 2.4s ease-in-out 3';
+  const total = 2400 * 3;
+  setTimeout(() => {
+    text.style.animation  = ''; qmark.style.animation = '';
+    setTimeout(() => { justExitedHotSeat = false; }, 120);
+  }, total);
+}
+
+/* ══════════════════════════════════════════════
+   HOT SEAT (single play, then fade to general)
+══════════════════════════════════════════════ */
+function enterHotSeatOnce() {
+  const text  = document.getElementById('layer8');
+  const qmark = document.getElementById('layer5');
+
+  text.style.animation  = 'none';
+  qmark.style.animation = 'none';
+  void text.offsetWidth;
+  void qmark.offsetWidth;
+
+  justExitedHotSeat = true;
+
+  // Note the trailing "1" instead of "3" — single iteration
+  text.style.animation  = 'hotSeatText 2.4s ease-in-out 1';
+  qmark.style.animation = 'hotSeatQmark 2.4s ease-in-out 1';
+
+  const total = 2400; // one cycle only
+
+  setTimeout(() => {
+    text.style.animation  = '';
+    qmark.style.animation = '';
+    justExitedHotSeat = false;
+
+    // Fade straight to general tier once the animation completes
+    changeTier('general_int', 'bg1');
+  }, total);
+}
+
+/* ══════════════════════════════════════════════
+   LOGO SCALE TOGGLE
+══════════════════════════════════════════════ */
+function toggleLogoScale() {
+  const logo = document.getElementById('logo');
+  if (!logo) return;
+  const cur = parseFloat(getComputedStyle(logo).getPropertyValue('--scale')) || 1;
+  logo.style.setProperty('--scale', cur === 1 ? 1.12 : 1);
+}
+
+/* ══════════════════════════════════════════════
+   PRIZE AMOUNTS
+══════════════════════════════════════════════ */
+function formatPrize(n) { return n.toLocaleString('en-US'); }
+
+function updatePrizeText() {
+  const gv = window.GameVariables;
+
+  function formatAmount(amount) {
+    return gv.NumberPrefix +
+      new Intl.NumberFormat(gv.LocaleCode, gv.FormatOptions)
+        .format(amount)
+        .replace(gv.ReplaceCharacterBefore, gv.ReplaceCharacterAfter)
+        .trim() +
+      gv.NumberSuffix;
+  }
+
+  const index = 4 + flipCount;
+  const amount = gv.PrizeAmounts[index] || 0;
+  const display = formatAmount(amount);
+
+  const prizeText = document.getElementById('prizeText');
+  const frontPrizeText = document.getElementById('frontPrizeText');
+  if (prizeText) prizeText.textContent = display;
+  if (frontPrizeText) frontPrizeText.textContent = display;
+}
+
+/* ══════════════════════════════════════════════
+   FLIP LOGO (back face, for Q1–Q14)
+══════════════════════════════════════════════ */
+function flipLogoRight(showPrize = true) {
+  const logo      = document.getElementById('logo');
+  const strap     = document.querySelector('.back-strap');
+  const prizeText = document.getElementById('prizeText');
+  const backFace  = document.querySelector('.logo-face.back');
+  const middleFace= document.querySelector('.logo-face.middle');
+  const frontAtom = document.querySelector('.front .atom');
+  const backAtom  = document.querySelector('.back .atom');
+  const backMain  = document.querySelector('.back-prize');
+
+  if (!logo) return;
+
+  // Reset leftovers
+  backFace.style.backfaceVisibility   = '';
+  backFace.style.webkitBackfaceVisibility = '';
+  backMain.style.transform  = '';
+  backMain.style.transition = '';
+  backMain.style.opacity    = '1';
+  if (middleFace) middleFace.style.visibility = '';
+  logo.style.transition = '';
+  logo.style.transform  = '';
+
+  const suffix   = tierSuffixMap[currentTier] || 'gen';
+  const flipImg  = `Images/flip${suffix}.png`;
+  const prizeImg = `Images/prize${suffix}.png`;
+  const isFlipped = logo.classList.contains('flipped');
+
+  if (!isFlipped) {
+    // ── Flip to back ──
+    frontAtom.style.opacity = '0';
+
+    setTimeout(() => { backMain.src = flipImg; }, 300);
+
+    logo.classList.add('flipped');
+
+    setTimeout(() => {
+      backMain.src = prizeImg;
+      backFace.style.zIndex = '1';
+
+      if (showPrize) {
+      if (wrongAnswerActive) {
+  // Show the reduced safety-net amount
+  prizeText.textContent =
+    getWrongAnswerPrizeDisplay(wrongAnswerTierAtTime);
+
+  frontPrizeText.textContent =
+    getWrongAnswerPrizeDisplay(wrongAnswerTierAtTime);
+
+  // Wrong answer has now been processed
+  wrongAnswerActive = false;
+  wrongAnswerTierAtTime = null;
+
+} else if (currentTier !== 'general_int') {
+  updatePrizeText();
+  flipCount++;
+}
+        // else: general tier, no wrong answer pending — leave prizeText
+        // as-is, it keeps showing whatever amount they already have
+
+        if (strap && prizeText) {
+          strap.style.animation    = 'strapZoomIn 0.6s ease-out forwards';
+          prizeText.style.animation = 'prizeZoomIn 0.6s ease-out forwards';
+        }
+      }
+    }, 1000);
+
+    setTimeout(() => { backAtom.style.opacity = '1'; }, 700);
+
+  } else {
+    // ── Flip back to front ──
+    backAtom.style.opacity = '0';
+
+    if (strap && prizeText) {
+      strap.style.animation    = 'strapZoomOut 0.5s ease-in forwards';
+      prizeText.style.animation = 'prizeZoomOut 0.5s ease-in forwards';
+    }
+
+    setTimeout(() => {
+      logo.classList.remove('flipped');
+      setTimeout(() => {
+        frontAtom.style.opacity = '1';
+        backFace.style.zIndex   = '-1';
+      }, 700);
+    }, 100);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   WINNER TIER
+   - Fades to combinedwinner / atomwinner / qmarkgen
+   - Zooms in strapformoney + winner prize text on FRONT face
+══════════════════════════════════════════════ */
+function winnerTier() {
+  // First hide winner strap if already showing
+  if (winnerActive) { hideWinnerStrap(); return; }
+
+  // Swap logo images (stays on front face — no flip)
+  fadeLayers('winner');
+  fadeBackground('winningbg');
+
+  currentTier = 'winner';
+  setBackFace('winner');
+
+  if (!justExitedHotSeat) setTimeout(setInlineGrowShrink, 120);
+
+  // Zoom in strap and prize text on front face after a short delay
+  setTimeout(showWinnerStrap, 400);
+}
+
+function showWinnerStrap() {
+  const strap     = document.getElementById('frontStrap');
+  const prizeText = document.getElementById('frontPrizeText');
+
+  // Set prize text to top prize
+  prizeText.textContent = formatPrize(window.GameVariables.PrizeAmounts[14]); // 500,000,000
+
+  strap.style.animation    = 'frontStrapZoomIn 0.6s ease-out forwards';
+  prizeText.style.animation = 'frontPrizeZoomIn 0.6s ease-out forwards';
+
+  winnerActive = true;
+}
+
+function hideWinnerStrap() {
+  const strap     = document.getElementById('frontStrap');
+  const prizeText = document.getElementById('frontPrizeText');
+
+  strap.style.animation    = 'frontStrapZoomOut 0.5s ease-in forwards';
+  prizeText.style.animation = 'frontPrizeZoomOut 0.5s ease-in forwards';
+
+  winnerActive = false;
+}
+
+/* ══════════════════════════════════════════════
+   CHROMA BACKGROUND TOGGLE
+══════════════════════════════════════════════ */
+function toggleChromaBG() {
+  const body   = document.body;
+  const videos = document.querySelectorAll('video.bg');
+  chromaBG = !chromaBG;
+  if (chromaBG) {
+    body.style.background = '#00FF00';
+    videos.forEach(v => v.style.display = 'none');
+  } else {
+    body.style.background = '#000';
+    videos.forEach(v => v.style.display = 'block');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   CHROMA LOGO VIDEO
+══════════════════════════════════════════════ */
+const chromaVideo  = document.getElementById('logo-chroma-video');
+const chromaCanvas = document.getElementById('logo-chroma-canvas');
+const chromaCtx    = chromaCanvas.getContext('2d');
+
+function resizeChroma() { chromaCanvas.width = window.innerWidth; chromaCanvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeChroma);
+resizeChroma();
+
+function playChromaLogo() {
+  chromaCanvas.style.display = 'block';
+  chromaVideo.currentTime = 0;
+  chromaVideo.play();
+
+  function render() {
+    if (chromaVideo.paused || chromaVideo.ended) { chromaCanvas.style.display = 'none'; return; }
+    chromaCtx.drawImage(chromaVideo, 0, 0, chromaCanvas.width, chromaCanvas.height);
+    const frame = chromaCtx.getImageData(0, 0, chromaCanvas.width, chromaCanvas.height);
+    const d = frame.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i+1], b = d[i+2];
+      if (g > 135 && g > r * 1.25 && g > b * 1.25) d[i+3] = 0;
+    }
+    chromaCtx.putImageData(frame, 0, 0);
+    requestAnimationFrame(render);
+  }
+  render();
+}
+
+function toggleBgLogoMode() {
+  const logo = document.getElementById('logo');
+  bgLogoMode = (bgLogoMode + 1) % 3;
+  chromaVideo.pause();
+  chromaCanvas.style.display = 'none';
+
+  if (bgLogoMode === 0) { logo.style.display = 'block'; fadeBackground('bg1'); }
+  if (bgLogoMode === 1) { logo.style.display = 'none';  fadeBackground('bg1'); }
+  if (bgLogoMode === 2) { logo.style.display = 'none';  fadeBackground('bg1'); playChromaLogo(); }
+}
+
+/* ══════════════════════════════════════════════
+   ORB PARTICLE SYSTEM
+══════════════════════════════════════════════ */
+const orbCanvas = document.getElementById('orb-canvas');
+const orbCtx    = orbCanvas.getContext('2d');
+let orbAnimId   = null;
+let orbFadeOut  = false;
+let orbAlpha    = 1;
+const orbParticles = [];
+
+function resizeOrb() { orbCanvas.width = window.innerWidth; orbCanvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeOrb);
+resizeOrb();
+
+function spawnSparks(x, y, color) {
+  for (let i = 0; i < 25; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 1.8 + 0.4;
+    orbParticles.push({
+      x, y,
+      vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+      life: 1, decay: Math.random() * 0.03 + 0.02,
+      size: Math.random() * 3 + 1, color
+    });
+  }
+}
+
+function drawOrbs(timestamp) {
+  const W = orbCanvas.width, H = orbCanvas.height;
+  const cx = W / 2, cy = H / 2;
+  const rx = 480, ry = 390;
+  const t = timestamp * 0.001;
+
+  orbCtx.clearRect(0, 0, W, H);
+  orbCtx.save();
+  orbCtx.globalAlpha = orbAlpha;
+
+  for (let i = orbParticles.length - 1; i >= 0; i--) {
+    const p = orbParticles[i];
+    p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+    if (p.life <= 0) { orbParticles.splice(i, 1); continue; }
+    orbCtx.beginPath();
+    orbCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+    orbCtx.fillStyle = p.color;
+    orbCtx.globalAlpha = orbAlpha * p.life * 0.8;
+    orbCtx.fill();
+  }
+  orbCtx.globalAlpha = orbAlpha;
+
+  for (let o = 0; o < 2; o++) {
+    const angle = -t * 1.4 + o * Math.PI;
+    const ox = cx + Math.cos(angle) * rx;
+    const oy = cy + Math.sin(angle) * ry;
+
+    spawnSparks(ox, oy, o === 0 ? 'rgba(160,210,255,0.9)' : 'rgba(200,230,255,0.9)');
+
+    const glow = orbCtx.createRadialGradient(ox, oy, 0, ox, oy, 38);
+    glow.addColorStop(0,    'rgba(255,255,255,1)');
+    glow.addColorStop(0.15, 'rgba(180,220,255,0.95)');
+    glow.addColorStop(0.45, 'rgba(80,160,255,0.5)');
+    glow.addColorStop(1,    'rgba(0,80,200,0)');
+    orbCtx.beginPath(); orbCtx.arc(ox, oy, 38, 0, Math.PI * 2);
+    orbCtx.fillStyle = glow; orbCtx.fill();
+
+    const core = orbCtx.createRadialGradient(ox, oy, 0, ox, oy, 9);
+    core.addColorStop(0,   'rgba(255,255,255,1)');
+    core.addColorStop(0.5, 'rgba(200,230,255,0.95)');
+    core.addColorStop(1,   'rgba(120,180,255,0)');
+    orbCtx.beginPath(); orbCtx.arc(ox, oy, 9, 0, Math.PI * 2);
+    orbCtx.fillStyle = core; orbCtx.fill();
+
+    orbCtx.strokeStyle = 'rgba(255,255,255,0.6)';
+    orbCtx.lineWidth = 1.2;
+    for (let a = 0; a < 4; a++) {
+      const ra  = (a * Math.PI) / 4 + Math.PI / 8;
+      const len = 18 + Math.sin(t * 3 + a) * 5;
+      orbCtx.beginPath();
+      orbCtx.moveTo(ox, oy);
+      orbCtx.lineTo(ox + Math.cos(ra) * len, oy + Math.sin(ra) * len);
+      orbCtx.stroke();
+    }
+  }
+
+  orbCtx.restore();
+
+  if (orbFadeOut) {
+    orbAlpha -= 0.025;
+    if (orbAlpha <= 0) {
+      orbAlpha = 0;
+      orbCanvas.style.display = 'none';
+      orbParticles.length = 0;
+      cancelAnimationFrame(orbAnimId);
+      orbAnimId = null;
+      return;
+    }
+  }
+  if (!orbFadeOut && orbAlpha < 1) orbAlpha = Math.min(1, orbAlpha + 0.025);
+
+  orbAnimId = requestAnimationFrame(drawOrbs);
+}
+
+function startOrbs() {
+  orbFadeOut = false; orbAlpha = 0;
+  orbParticles.length = 0;
+  orbCanvas.style.display = 'block';
+  if (orbAnimId) cancelAnimationFrame(orbAnimId);
+  orbAnimId = requestAnimationFrame(drawOrbs);
+}
+
+function stopOrbs() { orbFadeOut = true; }
+
+/* ══════════════════════════════════════════════
+   LIFELINE FLIP (50:50 / PAF / ATA / Switch overlay on back face)
+   Pulled out of the storage listener so it can be triggered
+   locally (buttons) or remotely (localStorage 'lifelineFlip').
+
+   LIFELINE_ASSETS maps each lifeline key to its image filename
+   (without .png), e.g. Images/fifty.png. Rename the values here if
+   your asset files use different names — the buttons below don't
+   need to change.
+══════════════════════════════════════════════ */
+const LIFELINE_ASSETS = {
+  fifty:    '5050',
+  audience: 'ata',
+  phone:    'paf',
+  switch:   'stq'
+};
+
+function showLifelineFlip(lifelineKey) {
+  const lifelineName = LIFELINE_ASSETS[lifelineKey] || lifelineKey;
+  const logo      = document.querySelector('.logo-container');
+  const backFace  = document.querySelector('.logo-face.back');
+  const middleFace= document.querySelector('.logo-face.middle');
+  const backMain  = document.querySelector('.back-prize');
+  const backAtom  = document.querySelector('.logo-face.back .atom');
+  const strap     = document.querySelector('.back-strap');
+  const prizeText = document.getElementById('prizeText');
+
+  if (!logo || !backMain || !backFace) return;
+
+  if (middleFace) middleFace.style.visibility = 'hidden';
+  backMain.style.opacity = '0';
+  if (backAtom)  backAtom.style.opacity = '0';
+  if (strap)     { strap.style.animation = 'none'; strap.style.opacity = '0'; strap.style.transform = 'scale(0)'; }
+  if (prizeText) { prizeText.style.animation = 'none'; prizeText.style.opacity = '0'; }
+  backMain.style.transform = 'scaleX(-1)';
+  backFace.style.backfaceVisibility = 'visible';
+  backFace.style.webkitBackfaceVisibility = 'visible';
+  backFace.style.zIndex = '1';
+  backMain.style.transition = 'none';
+  logo.style.transition = 'transform 1.2s ease-in-out';
+  logo.style.transform  = 'rotateY(180deg) scale(var(--scale))';
+  setTimeout(() => {
+    backMain.src = `Images/${lifelineName}.png`;
+    backMain.style.opacity = '1';
+    backMain.style.transition = 'none';
+  }, 600);
+  setTimeout(() => { startOrbs(); }, 600);
+}
+
+function hideLifelineFlip() {
+  const logo      = document.querySelector('.logo-container');
+  const backFace  = document.querySelector('.logo-face.back');
+  const middleFace= document.querySelector('.logo-face.middle');
+  const backMain  = document.querySelector('.back-prize');
+
+  if (!logo || !backMain || !backFace) return;
+
+  stopOrbs();
+  setTimeout(() => { backMain.style.opacity = '0'; }, 600);
+  logo.style.transition = 'transform 1.2s ease-in-out';
+  logo.style.transform  = 'rotateY(0deg) scale(var(--scale))';
+  const handleFlipEnd = (e) => {
+    if (e.propertyName !== 'transform') return;
+    if (middleFace) middleFace.style.visibility = '';
+    backFace.style.backfaceVisibility = 'hidden';
+    backFace.style.webkitBackfaceVisibility = 'hidden';
+    backMain.style.transform = '';
+    const suffix = tierSuffixMap[currentTier] || 'gen';
+    backMain.src = `Images/prize${suffix}.png`;
+    backMain.style.opacity = '1';
+    backFace.style.zIndex  = '-1';
+    logo.style.transition  = '';
+    logo.removeEventListener('transitionend', handleFlipEnd);
+  };
+  logo.addEventListener('transitionend', handleFlipEnd);
+}
+
+/* ══════════════════════════════════════════════
+   CROSS-WINDOW BROADCAST HELPER
+   (so local button presses on this window also notify
+   any other open control/video-wall windows)
+══════════════════════════════════════════════ */
+function broadcastLifelineFlip(action, lifeline) {
+  try {
+    localStorage.setItem('lifelineFlip', JSON.stringify({ action, lifeline, time: Date.now() }));
+  } catch (e) { console.error('broadcastLifelineFlip error:', e); }
+}
+
+/* Button-facing triggers: update this window immediately AND broadcast
+   so any other open window (control panel / second video wall) syncs. */
+function triggerLifelineFlipShow(lifelineKey) {
+  showLifelineFlip(lifelineKey);
+  broadcastLifelineFlip('show', lifelineKey);
+}
+
+function triggerLifelineFlipHide() {
+  hideLifelineFlip();
+  broadcastLifelineFlip('hide', null);
+}
+
+/* ══════════════════════════════════════════════
+   CROSS-WINDOW STORAGE LISTENERS
+══════════════════════════════════════════════ */
+window.addEventListener('storage', function (ev) {
+  // Tier change
+  if (ev.key === 'videoWallTier' && ev.newValue) {
+    try {
+      const data = JSON.parse(ev.newValue);
+      if (data.tier && data.bg) changeTier(data.tier, data.bg);
+    } catch (e) { console.error('videoWallTier parse error:', e); }
+  }
+
+  // Winner tier
+  if (ev.key === 'videoWallWinner' && ev.newValue) {
+    try {
+      const data = JSON.parse(ev.newValue);
+      if (data.action === 'show') winnerTier();
+      if (data.action === 'hide') hideWinnerStrap();
+    } catch (e) { console.error('videoWallWinner parse error:', e); }
+  }
+
+  // Lifeline flip
+  if (ev.key === 'lifelineFlip' && ev.newValue) {
+    try {
+      const data = JSON.parse(ev.newValue);
+      if (data.action === 'show') showLifelineFlip(data.lifeline);
+      if (data.action === 'hide') hideLifelineFlip();
+    } catch (e) { console.error('lifelineFlip parse error:', e); }
+  }
+
+  // Hot seat
+  if (ev.key === 'videoWallEvent' && ev.newValue) {
+    try {
+      const data = JSON.parse(ev.newValue);
+      if (data.action === 'enterHotSeat')     enterHotSeat();
+      if (data.action === 'enterHotSeatOnce') enterHotSeatOnce();
+    } catch (e) { console.error('videoWallEvent parse error:', e); }
+  }
+
+  // Logo flip trigger
+  if (ev.key === 'logoFlipTrigger' && ev.newValue) {
+    try {
+      const data = JSON.parse(ev.newValue);
+      if (data.time) flipLogoRight();
+    } catch (e) { console.error('logoFlipTrigger parse error:', e); }
+  }
+});
+
+/* ══════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+   ────────────────────────────────────────────
+   STREAM DECK SETUP:
+   In the Stream Deck app, set each button's action to
+   "System → Hotkey" and enter the matching key below.
+   This window/tab must be focused (click it once) for
+   key presses to reach it — same as any other hotkey-
+   driven browser control (OBS, etc).
+
+     0        General
+     1 / 2 / 3 / 4   Tier 1 / 2 / 3 / 4
+     F        QFFF
+     X        Wrong answer
+     W        Winner (press again to hide strap)
+     H        Enter Hot Seat (3x loop)
+     J        Enter Hot Seat (once → General)
+     G        Flip logo (with prize)
+     Shift+G  Flip logo (no prize)
+     S        Toggle logo scale
+     B        Toggle BG / Logo video mode
+     C        Toggle chroma-key background
+     O        Start orbs
+     Shift+O  Stop orbs
+     5        Lifeline: 50:50 show
+     A        Lifeline: Ask the Audience show
+     P        Lifeline: Phone a Friend show
+     K        Lifeline: Switch show
+     L        Lifeline: hide (any lifeline)
+     V        Toggle on-screen control panel
+══════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  switch (e.key) {
+    case '0': changeTier('general_int', 'bg1');  break;
+    case '1': changeTier('q1_q5',       'bgq1'); break;
+    case '2': changeTier('q6_q10',      'bgq6'); break;
+    case '3': changeTier('q11_q14',     'bgq11');break;
+    case '4': changeTier('q15',         'bgq15');break;
+    case '5': triggerLifelineFlipShow('fifty');  break;
+
+    case 'f': case 'F': changeTier('qfff', 'wrongbg'); break;
+    case 'x': case 'X': wrongAnswer();                 break;
+    case 'w': case 'W': winnerTier();                  break;
+
+    case 'h': enterHotSeat();     break;
+    case 'j': enterHotSeatOnce(); break;
+
+    case 'g': flipLogoRight(true);  break;
+    case 'G': flipLogoRight(false); break;
+
+    case 's': case 'S': toggleLogoScale();  break;
+    case 'b': case 'B': toggleBgLogoMode(); break;
+    case 'c': case 'C': toggleChromaBG();   break;
+
+    case 'o': startOrbs(); break;
+    case 'O': stopOrbs();  break;
+
+    case 'a': case 'A': triggerLifelineFlipShow('audience'); break;
+    case 'p': case 'P': triggerLifelineFlipShow('phone');    break;
+    case 'k': case 'K': triggerLifelineFlipShow('switch');   break;
+    case 'l': case 'L': triggerLifelineFlipHide();           break;
+
+    case 'v': case 'V': {
+      const panel = document.getElementById('controls');
+      if (panel) panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+      break;
+    }
+  }
+});
+
+</script>
+</body>
+</html>

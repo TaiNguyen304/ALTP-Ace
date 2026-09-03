@@ -1,0 +1,135 @@
+<questions>
+	<fastest difficulty="0">
+	<text>Sắp xếp các đơn vị đo độ dài sau theo thứ tự từ nhỏ đến lớn.</text>
+	<a>Mét</a>
+	<b>Milimét</b>
+	<c>Kilômét</c>
+	<d>Xentimét</d>
+	<correctOrder>
+		<one>b</one>
+		<two>d</two>
+		<three>a</three>
+		<four>c</four>
+	</correctOrder>
+    </fastest>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Đâu là tên gọi một ca khúc do nhạc sĩ Trịnh Công Sơn sáng tác?</text>
+		<a correct="no">Em là bông cúc nhỏ</a>
+		<b correct="yes">Em là bông hồng nhỏ</b>
+		<c correct="no">Em là bông sen nhỏ</c>
+		<d correct="no">Em là bông lan nhỏ</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>AM (thường được dùng khi nói về thời gian trong tiếng Anh) là viết tắt theo tiếng Latinh của từ nào sau đây?</text>
+		<a correct="no">At midnight</a>
+		<b correct="yes">Ante meridiem</b>
+		<c correct="no">At morning</c>
+		<d correct="no">After morning</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Lionel Messi là vận động viên nổi tiếng của môn thể thao nào?</text>
+		<a correct="no">Bóng bàn</a>
+		<b correct="no">Cầu lông</b>
+		<c correct="yes">Bóng đá</c>
+		<d correct="no">Bóng rổ</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Vào ngày 26/2/2025, Việt Nam cùng đất nước nào đã nâng cấp quan hệ lên Đối tác chiến lược toàn diện?</text>
+		<a correct="no">Úc</a>
+		<b correct="no">Malaysia</b>
+		<c correct="no">Ấn Độ</c>
+		<d correct="yes">New Zealand</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Hình ảnh ngôi sao 5 cánh không xuất hiện trên quốc kỳ của quốc gia châu Á nào sau đây?</text>
+		<a correct="no">Myanmar</a>
+		<b correct="yes">Mông Cổ</b>
+		<c correct="no">CHDCND Triều Tiên</c>
+		<d correct="no">Singapore</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Từ nào sau đây chỉ màu sắc đồng thời là tên một kim loại?</text>
+		<a correct="no">Đen</a>
+		<b correct="yes">Vàng</b>
+		<c correct="no">Hồng</c>
+		<d correct="no">Trắng</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Cà phê vối là tên gọi Việt Nam dành cho loại cà phê nào trên thế giới?</text>
+		<a correct="no">Arabica</a>
+		<b correct="no">Liberica</b>
+		<c correct="yes">Robusta</c>
+		<d correct="no">Excelsa</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Màn trình diễn của nghệ sĩ nào hiện đang nắm giữ kỷ lục về buổi biểu diễn giải lao được xem nhiều nhất lịch sử sự kiện thể thao Super Bowl?</text>
+		<a correct="no">Taylor Swift</a>
+		<b correct="no">Michael Jackson</b>
+		<c correct="no">Rihanna</c>
+		<d correct="yes">Kendrick Lamar</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Từ nào sau đây còn là một tính từ?</text>
+		<a correct="no">Máy tính</a>
+		<b correct="yes">Máy móc</b>
+		<c correct="no">Máy bơm</c>
+		<d correct="no">Máy quay</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Theo luật có hiệu lực từ 1/1/2025, người lái xe, người điều khiển xe máy chuyên dùng tham gia giao thông đường bộ phải bật đèn chiếu sáng phía trước trong thời gian nào?</text>
+		<a correct="no">17h hôm trước đến 6h sáng hôm sau</a>
+		<b correct="no">17h30 hôm trước đến 6h sáng hôm sau</b>
+		<c correct="yes">18h hôm trước đến 6h sáng hôm sau</c>
+		<d correct="no">18h30 hôm trước đến 6h sáng hôm sau</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Bệnh K là cách gọi khác của căn bệnh nào?</text>
+		<a correct="no">Đột quỵ</a>
+		<b correct="no">Tăng huyết áp</b>
+		<c correct="yes">Ung thư</c>
+		<d correct="no">Gan nhiễm mỡ</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Bộ lông của loài nào sau đây có ít màu hơn cả?</text>
+		<a correct="no">Ngựa vằn</a>
+		<b correct="no">Chó đốm</b>
+		<c correct="no">Mèo tam thể</c>
+		<d correct="yes">Chuột bạch</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Đâu không phải là một trong bốn loại cây tứ quý tượng trưng cho bốn mùa ở Việt Nam?</text>
+		<a correct="no">Tùng</a>
+		<b correct="no">Cúc</b>
+		<c correct="no">Trúc</c>
+		<d correct="yes">Đào</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Đâu là bệnh lây qua đường hô hấp?</text>
+		<a correct="no">Tiểu đường</a>
+		<b correct="no">Viêm khớp</b>
+		<c correct="yes">Lao phổi</c>
+		<d correct="no">Tiêu chảy</d>
+	</question>
+	<question>
+		<category>Kiến thức chung</category>
+		<text>Bộ phim "Bohemian Rhapsody" là tác phẩm tiểu sử về nhóm nhạc rock đến từ quốc gia nào?</text>
+		<a correct="no">Đức</a>
+		<b correct="no">Cộng hòa Séc</b>
+		<c correct="no">Mỹ</c>
+		<d correct="yes">Anh</d>
+	</question>
+</questions>

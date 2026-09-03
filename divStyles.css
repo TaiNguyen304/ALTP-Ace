@@ -1,0 +1,707 @@
+div {
+	position:absolute;
+	margin:auto;
+}
+
+.answerStrapDiv {
+	width:1920px;
+	height:96px;
+	left:0px;
+	right:0px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.answerGroupADiv {
+	-webkit-transform-origin-x:960px;
+	-webkit-transform-origin-y:-174px;
+	-webkit-transform-origin-z:0px;
+}
+
+.answerGroupBDiv {
+	-webkit-transform-origin-x:960px;
+	-webkit-transform-origin-y:-74px;
+	-webkit-transform-origin-z:0px;
+}
+
+.answerStrap1Div {
+	width:1920px;
+	height:96px;
+	left:0px;
+	right:0px;
+}
+
+.answerStrapLifeLineCenterDiv {
+	bottom:104px;
+	left:0px;
+	right:0px;
+	width:150px;
+	height:122px;
+}
+
+.answerStrapLifeLineCenterContainerDiv {
+	bottom:0px;
+	left:0px;
+	right:0px;
+	top:0px;
+	width:150px;
+	height:122px;
+}
+
+.answerStrapLifeLineCenterContainer1Div {
+	bottom:150px;
+	left:0px;
+	right:0px;
+	top:-1203px;
+	width:150px;
+	height:122px;
+}
+
+.ataGraphDiv {
+	width:330px;
+	height:500px;
+	background:url('../Images/audience_graphnoabcd.png') no-repeat;
+	top:155px;
+	right:270px;
+	opacity:0;
+	scale: 90%;
+}
+
+.ataGraphBarDiv {
+	background:url('../Images/audience_answer_bar.png') no-repeat;
+	width:45px;
+	bottom:183px;
+}
+
+.ataGraphPercentDiv{
+	font-family:Verdana;
+	font-size:20pt;
+	text-align:center;
+	width:75px;
+	color:white;
+	top:20px;
+}
+
+.ataPercentStrapDiv {
+	width:146px;
+	height:70px;
+	background:url('../Images/ata_percent_strap_background.png') no-repeat;
+	top:0px;
+	bottom:0px;
+	right:38px;
+	color:white;
+	font-family:Verdana;
+	font-size:28pt;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+
+.contestantNameAndLocationDiv {
+	width:1920px;
+	height:244px;
+	bottom:18px;
+	background:url('../Images/Large_Win_Strap_Stretched_Gradient_Filled.png') no-repeat;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.currentLevelStrap1Div {
+	width:504px;
+	height:55px;
+	background:url('../Images/small_side_strap_fill.png') no-repeat;
+	left:-504px;
+	bottom:510px;
+	overflow:hidden;
+	scale: 75%;
+}
+
+.currentLevelStrapDiv {
+	width:504px;
+	height:55px;
+	background:url('../Images/small_side_strap_fill.png') no-repeat;
+	top:106px;
+	left:-504px;
+	overflow:hidden;
+}
+
+.currentLevelStrapAmountDiv{
+	color:white;
+	font-family:'Copperplate31bc';
+	font-size:35pt;
+	height:46px;
+	width:733px;
+	top:0px;
+	bottom:0px;
+	left:-37px;
+	text-align:center;
+	text-shadow:2px 2px 0px black;
+	letter-spacing:-2px;
+	scale:100% 100%;
+}
+
+.fastestContestantDiv {
+	height:96px;
+	width:1920px;
+	background:url('../Images/fastest_time_strap_fill.png') no-repeat;
+}
+
+.fastestContestantWinnerDiv {
+	height:244px;
+	width:1920px;
+	background:url('../Images/Large_Win_Strap_Stretched_Gradient_Filled.png') no-repeat
+}
+
+.fastestFingerContestantsDiv {
+	width:1920px;
+	height:845px;
+	top:0px;
+	bottom:0px;
+	left:0px;
+	right:0px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.logoContainerDiv {
+	background-color:black;
+	width:1920px;
+	height:1080px;
+	top:0px;
+	bottom:0px;
+	left:0px;
+	right:0px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.logoDiv{
+	width:450px;
+	height:450px;
+	top:0px;
+	bottom:0px;
+	right:0px;
+	left:0px;
+}
+
+.stageContainerDiv {
+	width:1920px;
+	height:1080px;
+	background: url('../Images/background.png') no-repeat;
+	top:0px;
+	bottom:0px;
+	left:0px;
+	right:0px;
+	overflow:hidden;
+}
+
+.stageContainer1Div {
+	width:1920px;
+	height:1080px;
+	top:0px;
+	bottom:0px;
+	left:0px;
+	right:0px;
+	overflow:hidden;
+}
+
+.fastestFingerRevealOrderDiv{
+	background:url('../Images/tree_background.png') no-repeat;
+	height:1080px;
+	width:760px;
+	right:-760px;
+	top:0px;
+	bottom:0px;
+}
+
+.fastestFingerTreeAnswerDiv{
+	background:url('../Images/fastest_tree_strap_fill.png') no-repeat;
+	width:780px;
+	height:96px;
+	left:760px;
+}
+
+.fastestFingerTreeQuestionDiv {
+	width:450px;
+	height:350px;
+	top:225px;
+	left:40px;
+	line-height:1.25;
+}
+
+.leftAnswerDiv {
+	width:857px;
+	height:96px;
+	left:132px;
+}
+
+.lifeLinesLeftStrapDiv {
+	width:1696px;
+	height:200px;
+	background:url('../Images/large_lifeline_strap_holder.png') no-repeat;
+	bottom:65px;
+	left:1920px;
+	scale:90%;	
+	overflow:hidden;
+}
+
+.lifeLinesLeftForStrapDiv {
+	width:1696px;
+	height:200px;
+	background:url('../Images/large_lifeline_strap_holder.png') no-repeat;
+	bottom:380px;
+	right:1920px;
+	scale: 50%;
+	overflow:hidden;
+
+}
+
+.lifelineTreeDiv {
+	top:-50px;
+	bottom:-50px;
+	right:-50px;
+	left:-50px;
+	width:123px;
+	height:100px;
+}
+
+.lifelineTreeHolderDiv{
+	width:123px;
+	height:100px;
+}
+
+.lifelineStrapHolderDiv{
+	width:200px;
+	height:162px;
+}
+
+.lifelineForStrapHolderDiv{
+	width:200px;
+	height:162px;
+}
+
+
+.lifeLineStrapDiv {
+	height:140px;
+	width:171px;
+	top:-50px;
+	left:-50px;
+	bottom:-50px;
+	right:-50px;
+}
+
+.lifeLineForStrapDiv {
+	height:140px;
+	width:171px;
+	top:0px;
+	left:-50px;
+	bottom:0px;
+	right:-50px;
+}
+
+.millionaireWinnerTitleDiv {
+	width:1920px;
+	height:387px;
+	left:0px;
+	right:0px;
+	bottom:-300px;
+}
+
+.millionaireWinnerTitle1Div {
+	width:1920px;
+	height:387px;
+	left:0px;
+	right:0px;
+	bottom:713px;
+	opacity: 0;
+}
+
+.millionaireWinnerName1Div {
+	width:1920px;
+	height:80px;
+	left:0px;
+	right:0px;
+	top:28px;
+	color:white;
+	font-family:Verdana;
+	text-align:center;
+	font-size:41pt;
+}
+
+
+.millionaireWinner1Div {
+	width:1920px;
+	height:130px;
+	left:0px;
+	right:0px;
+	bottom:163px;
+	color:#FEAD13;
+	font-family:Verdana;
+	text-align:center;
+	font-size:41pt;
+	scale:100% 100%;
+}
+
+.millionaireWinnerNameDiv{
+	width:1920px;
+	height:60px;
+	left:0px;
+	right:0px;
+	top:101px;
+	color:white;
+	font-family:Verdana;
+	text-align:center;
+	font-size:43pt;
+	text-shadow:2px 2px 0px black;
+}
+
+.millionaireWinnerDiv {
+	width:1920px;
+	height:130px;
+	left:-12px;
+	right:0px;
+	bottom:64px;
+	color:white;
+	font-family:'Copperplate31bc';
+	text-align:center;
+	font-size:94pt;
+	text-shadow:-1px -1px 0px black, 0px -1px 0px black, 1px -1px 0px black, -1px 0px 0px black, 1px 0px 0px black, -1px 1px 0px black, 0px 1px 0px black, 1px 1px 0px black, 4px 4px 0px black;
+	letter-spacing:-3px;
+	scale:100% 100%;
+}
+
+.moneyTreeDiv {
+	background:url('../Images/tree_background.png') no-repeat;
+	height:1080px;
+	width:760px;
+	right:-760px;
+	top:0px;
+	bottom:0px;
+	overflow:hidden;
+}
+
+.moneyTree1Div {
+	background:url('../Images/tree_background.mp4') no-repeat;
+	height:1080px;
+	width:760px;
+	top:339px;
+	right: -120px;
+	bottom:0px;
+	overflow:hidden;
+	scale: 70%;
+}
+
+.pafAtomDiv {
+	width:400px;
+	height:400px;
+	left:0px;
+	top:0px;
+	bottom:0px;
+	overflow:hidden;
+	transform:perspective(0px) rotate(0deg);
+}
+
+.pafGradientDiv {
+	width:400px;
+	height:400px;
+	left:0px;
+	top:0px;
+	bottom:0px;
+}
+
+.pafClockDiv {
+	width:400px;
+	height:400px;
+	background:url('../Images/paf_clock_background.png') no-repeat;
+	bottom:525px;
+	right:-400px;
+	scale:73%;
+}
+
+.pafClockTimeDiv>span {
+	font-family:'Copperplate31bc';
+	color:transparent;
+	font-size:140pt;
+	position:absolute;
+	letter-spacing:-6px;
+	width:400px;
+	height:164px;
+	left:-2px;
+	right:0px;
+	top:106px;
+	text-align:center;
+	background:linear-gradient(165deg, white, #969696, #b8ac9c);
+	-webkit-background-clip:text;
+}
+
+.pafClockTimeDiv>span:nth-child(1) {
+	z-index:2;
+}
+
+.pafClockTimeDiv>span:nth-child(2) {
+	z-index:1;
+	text-shadow:-2px -2px 1px white, -1px -2px 1px #999999, 0px -2px 1px #999999, -2px -1px 1px #999999, -2px 0px 1px #999999, -1px -1px 1px #999999, 2px 2px 1px #646464, 1px 2px 1px #646464, 0px 2px 1px #646464, 2px 1px 1px #646464, 2px 0px 1px #646464, 1px 1px 1px #646464, 6px 6px 8px #00000080;
+}
+
+.pafClock2Div {
+	width:400px;
+	height:400px;
+	background:url('../Images/paf_clock_background.png') no-repeat;
+	bottom:206px;
+	right:184px;
+	scale: 200%;
+	transform:perspective(0px) scale(0);
+	opacity:1;
+	-moz-opacity:1;
+	-webkit-opacity:1;
+}
+
+.pafClock1Div {
+	width:400px;
+	height:400px;
+	bottom:286px;
+	right:456px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.rightAnswerDiv {
+	width:857px;
+	height:96px;
+	right:133px;
+}
+
+.questionStrapDiv {
+	width:1920px;
+	height:192px;
+	background:url('../Images/Large_Strap_Fill.png') no-repeat;
+	bottom:174px;
+	left:0px;
+	right:0px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.questionleftbarDiv {
+	width:1043px;
+	height:168px;
+	background:#002060;
+	bottom:606px;
+	left:-380px;
+	right:1074px;
+	scale: 43.4%;
+}
+
+.rightbarDiv {
+	width:1043px;
+	height:168px;
+	background:#00B050;
+	bottom:517px;
+	left:-380px;
+	right:1074px;
+	scale: 43.4%;
+}
+
+.moneylostbarDiv {
+	width:1043px;
+	height:168px;
+	background:#FF0000;
+	bottom:517px;
+	left:0px;
+	right:530px;
+	scale: 43.4%;
+}
+
+.contestantinfoDiv {
+	width:1381px;
+	height:110px;
+	left:5px;
+	bottom:8px;
+	overflow:hidden;
+	background:black;
+	border-radius:13px;
+	outline-style:solid;
+	outline-color:#177bf5;
+	outline-width:8px;
+	transform-origin:bottom left;
+	scale:100%;
+}
+
+.hostinformationDiv {
+	width:1381px;
+	height:280px;
+	left:5px;
+	bottom:136px;
+	overflow:hidden;
+	background:black;
+	border-radius:13px;
+	outline-style:solid;
+	outline-color:#177bf5;
+	outline-width:8px;
+	transform-origin:bottom left;
+	scale:100%;
+}
+
+.moneywrongbarDiv {
+	width:1043px;
+	height:168px;
+	background:#00B0F0;
+	bottom:517px;
+	left:0px;
+	right:-393px;
+	scale: 43.4%;
+}
+
+.walkawaybarDiv {
+	width:1043px;
+	height:168px;
+	background:#FFC000;
+	bottom:606px;
+	left:0px;
+	right:530px;
+	scale: 43.4%;
+}
+
+.noanswerbarDiv {
+	width:150px;
+	height:150px;
+	background:#7F7F7F;
+	bottom:615px;
+	left:0px;
+	right:-25px;
+	scale: 43.4%;
+}
+
+.rightanswerbarDiv {
+	width:150px;
+	height:150px;
+	background:#00B050;
+	bottom:615px;
+	left:0px;
+	right:-25px;
+	scale: 43.4%;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.wronganswerbarDiv {
+	width:150px;
+	height:150px;
+	background:#FF0000;
+	bottom:615px;
+	left:0px;
+	right:-25px;
+	scale: 43.4%;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;	
+}
+
+.questionStrap1Div {
+	width:1920px;
+	height:192px;
+	background:url('../Images/Large_Strap_Fill.png') no-repeat;
+	bottom:912px;
+	left:0px;
+	right:0px;
+}
+
+.stageBackgroundDiv {
+	width:1920px;
+	height:1080px;
+	top:0px;
+	bottom:0px;
+	right:0px;
+	left:0px;
+}
+
+.totalPrizeMoney1Div {
+	width:1920px;
+	height:387px;
+	left:0px;
+	right:0px;
+	bottom:730px;
+	top: 0px;
+	opacity: 0;
+}
+
+.totalPrizeMoneyDiv {
+	width:1920px;
+	height:387px;
+	left:0px;
+	right:0px;
+	bottom:-300px;
+}
+
+.totalPrizeDiv {
+	width:1920px;
+	height:60px;
+	left:0px;
+	right:0px;
+	top:101px;
+	color:white;
+	font-family:Verdana;
+	text-align:center;
+	font-size:43pt;
+	text-shadow:2px 2px 0px black;
+}
+
+.totalPrizeMoneyWonDiv {
+	width:1920px;
+	height:130px;
+	left:-12px;
+	right:0px;
+	bottom:64px;
+	color:#FFA71E;
+	font-family:'Copperplate31bc';
+	text-align:center;
+	font-size:94pt;
+	text-shadow:-1px -1px 0px black, 0px -1px 0px black, 1px -1px 0px black, -1px 0px 0px black, 1px 0px 0px black, -1px 1px 0px black, 0px 1px 0px black, 1px 1px 0px black, 4px 4px 0px black;
+	letter-spacing:-3px;
+	scale:100% 100%;
+}
+
+.totalPrize1Div {
+	width:1920px;
+	height:80px;
+	left:0px;
+	right:0px;
+	top:35px;
+	color:white;
+	font-family:Verdana;
+	text-align:center;
+	font-size:41pt;
+}
+
+.totalPrizeMoneyWon1Div {
+	width:1920px;
+	height:130px;
+	left:0px;
+	right:0px;
+	bottom:163px;
+	color:white;
+	font-family:Verdana;
+	text-align:center;
+	font-size:41pt;
+	scale:100% 100%;
+}
+
+.winStrapDiv {
+	width:1920px;
+	height:192px;
+	background:url('../Images/Large_Win_Strap_Filled.png') no-repeat;
+	left:0px;
+	right:0px;
+	bottom:90px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}

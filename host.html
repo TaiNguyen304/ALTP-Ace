@@ -1,0 +1,344 @@
+<html>
+	<head>
+		<title>Millionaire Host</title>
+		
+		<link rel="shortcut icon" href="Images/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="Images/favicon.ico" type="image/x-icon">
+		
+		<link rel="stylesheet" type="text/css" href="reset.css">
+		<link rel="stylesheet" type="text/css" href="bodyStyles.css">
+		<link rel="stylesheet" type="text/css" href="divStyles.css">
+		<link rel="stylesheet" type="text/css" href="pStyles.css">
+		<link rel="stylesheet" type="text/css" href="imgStyles.css">
+		<link rel="stylesheet" type="text/css" href="tableStyles.css">
+		
+		<script type="text/javascript" src="jquery-2.1.1.min.js"></script>
+		<script type="text/javascript" src="jquery.3d.js"></script>
+		<script type="text/javascript" src="accounting.js"></script>
+		<script type="text/javascript" src="Variables.js"></script>
+		<script type="text/javascript" src="CameraControl.js"></script>
+		<script type="text/javascript" src="AudioControl.js"></script>
+		<script type="text/javascript" src="socket.io/socket.io.js"></script>
+		<script type="text/javascript" src="linking.js"></script>
+		<script type="text/javascript" src="FastestFingerControl.js"></script>
+		<script type="text/javascript" src="GeneralControl.js"></script>
+		<script type="text/javascript" src="videobg.js"></script>
+		<script type="text/javascript" src="QuestionAndAnswerControl.js"></script>
+		<script type="text/javascript" src="WinningsControl.js"></script>
+		<script type="text/javascript" src="MoneyTreeControl.js"></script>
+		<script type="text/javascript" src="LifelineControl.js"></script>
+		<script type="text/javascript" src="ContestantsControl.js"></script>
+		<script type="text/javascript" src="KeyboardController.js"></script>		
+		<script type="text/javascript" src="Init.js"></script>
+	</head>
+	<body>
+		<div class="stageContainer1Div">
+			<video id="video" width="1920" height="1080" autoplay></video>
+			<!-- Stage Background Div -->
+			<div class="stageBackgroundDiv">
+				<img src="Images/Millionaire_Background.png" id="stageBackgroundImg" style="opacity:0;-moz-opacity:0;-webkit-opacity:0;"/>
+			</div>
+			
+			<!-- Question Strap Div -->
+			<div class="questionStrap1Div">
+				<img src="Images/Large_Strap_Gradient.png" />
+				<table class="questionTable">
+					<tr>
+						<td class="questionTd">
+							A sample question will go here...
+						</td>
+					</tr>
+				</table>
+			</div>
+
+</body>
+</html>
+
+			<!-- Enter Here -->
+			<div class="contestantinfoDiv">
+					<p class="contestantNameForHostP">Contestant Name - </p>
+						<p class="contestantLocationForHostP">Location</p>
+			</div>
+
+			<div class="hostinformationDiv">
+				<table class="infoTable">
+					<tr>
+						<td class="infoTd">
+						</td>
+					</tr>
+				</table>
+
+                <table class="hostNoteTable">
+        <tr>
+            <td class="hostNoteTd">
+			</td>
+        </tr>
+    </table>
+</div>
+
+			<!-- Enter Here -->
+			<div class="questionleftbarDiv">
+					<p class="questionsLeftP">QLet: 15</p>
+			</div>
+
+			<!-- Enter Here -->
+			<div class="rightbarDiv">
+				<p class="moneyrightP">$0</p>
+			</div>
+
+			<!-- Enter Here -->
+			<div class="moneylostbarDiv">
+				<p class="moneylostP">$0</p>
+			</div>
+
+			<!-- Enter Here -->
+			<div class="walkawaybarDiv">
+				<p class="moneywalkawayP">$0</p>
+			</div>
+
+			<!-- Enter Here -->
+			<div class="moneywrongbarDiv">
+				<p class="moneywrongP">$0</p>
+			</div>
+
+						<!-- Enter Here -->
+			<div class="noanswerbarDiv">
+			</div>
+
+			<!-- Enter Here -->
+			<div class="rightanswerbarDiv">
+				<p class="letterrightP">B</p>
+			</div>
+
+			<!-- Enter Here -->
+			<div class="wronganswerbarDiv">
+				<p class="letterrightP">A</p>
+			</div>
+
+
+				<p class="breakP">BREAK</p>
+			
+			<div class="answerGroupA1Div" style="bottom:0px;" >
+				<!-- Answer Straps A and B Div -->
+				<div class="answerStrap1Div" style="bottom:837px;" >
+					<div class="leftAnswerDiv" id="answerA" >
+						<img src="Images/Normal_Answer_Left_Fill.png" />
+						<img src="Images/Final_Answer_Left_Fill.png" class="finalImg" />
+						<img src="Images/Correct_Answer_Left_Fill.png" class="correctImg" />
+						<img src="Images/orange_diagonal.png" class="diagonalImg"/>
+						<p class="letterP">A:</p>
+						<p class="answerP">Answer for A Goes Here...</p>
+						<div class="ataPercentStrapDiv">
+							<img src="Images/ata_percent_strap.png" />
+							<p class="ataPercentStrapP" id="ataPercentStrapA">100%</p>
+						</div>
+					</div>
+					<div class="rightAnswerDiv" id="answerB">
+						<img src="Images/Normal_Answer_Right_Fill.png" />
+						<img src="Images/Final_Answer_Right_Fill.png" class="finalImg" />
+						<img src="Images/Correct_Answer_Right_Fill.png" class="correctImg" />
+						<img src="Images/orange_diagonal.png" class="diagonalImg"/>
+						<p class="letterP">B:</p>
+						<p class="answerP">Answer for B Goes Here...</p>
+						<div class="ataPercentStrapDiv">
+							<img src="Images/ata_percent_strap.png" />
+							<p class="ataPercentStrapP" id="ataPercentStrapB">100%</p>
+						</div>
+					</div>
+					<img src="Images/Full_Answer_Strap_Gradient.png" />
+				</div>
+			</div>
+			
+			<div class="answerGroupB1Div" style="bottom:0px;" >
+				<!-- Answer Straps C and D Div -->
+				<div class="answerStrap1Div" style="bottom:742px;" >
+					<div class="leftAnswerDiv" id="answerC" >
+						<img src="Images/Normal_Answer_Left_Fill.png" />
+						<img src="Images/Final_Answer_Left_Fill.png" class="finalImg" />
+						<img src="Images/Correct_Answer_Left_Fill.png" class="correctImg" />
+						<img src="Images/orange_diagonal.png" class="diagonalImg"/>
+						<p class="letterP">C:</p>
+						<p class="answerP">Answer for C Goes Here...</p>
+						<div class="ataPercentStrapDiv">
+							<img src="Images/ata_percent_strap.png" />
+							<p class="ataPercentStrapP" id="ataPercentStrapC">100%</p>
+						</div>
+					</div>
+					<div class="rightAnswerDiv" id="answerD">
+						<img src="Images/Normal_Answer_Right_Fill.png" />
+						<img src="Images/Final_Answer_Right_Fill.png" class="finalImg" />
+						<img src="Images/Correct_Answer_Right_Fill.png" class="correctImg" />
+						<img src="Images/orange_diagonal.png" class="diagonalImg"/>
+						<p class="letterP">D:</p>
+						<p class="answerP">Answer for D Goes Here...</p>
+						<div class="ataPercentStrapDiv">
+							<img src="Images/ata_percent_strap.png" />
+							<p class="ataPercentStrapP" id="ataPercentStrapD">100%</p>
+						</div>
+					</div>
+					<img src="Images/Full_Answer_Strap_Gradient.png" />
+				</div>
+			</div>
+			
+			<!-- Answer Straps Life Line Centered Div -->
+			<div class="answerStrapLifeLineCenterDiv">
+				<div class="answerStrapLifeLineCenterContainer1Div">
+					<img src="Images/stq.png" class="lifelineCenterImg" id="stqLifeLineCenterImg"/>
+				</div>
+			</div>
+			
+			<!-- Win Strap Div -->
+			<div class="winStrapDiv">
+				<img src="Images/winnings_glow.png" style="top:0px;bottom:0px;left:170px;"/>
+				<img src="Images/winnings_glow.png" style="top:0px;bottom:0px;right:170px;"/>
+				<p class="winningsP">$250,000</p>
+			</div>
+			
+			<!-- Contestant Name Strap Div -->
+			<div class="contestantNameAndLocationDiv">
+				<p class="contestantNameP">
+					UNNAMED PLAYER
+				</p>
+				<p class="contestantLocationP">
+					UNNAMED LOCATION
+				</p>
+			</div>
+
+			<!-- Current Level Strap Div-->
+			<div class="currentLevelStrap1Div" style="opacity:1;">
+				<img src="Images/small_side_strap.png" />
+				<img src="Images/small_side_strap_gold.png" class="sideStrapGoldImg"/>
+				<img src="Images/small_side_strap_gold_fill.png" class="sideStrapGoldFillImg"/>
+				<div class="currentLevelStrapAmountDiv">
+					$1,000,000
+				</div>
+			</div>
+				
+			<!-- Money Tree Div -->
+			<div class="moneyTree1Div">
+				<div class="lifelineTreeHolderDiv" style="top:107px;left:102px;transform:perspective(0px);">
+					<div class="lifelineTreeDiv ffLifeLine">
+						<img src="Images/5050.png" class="lifelineTreeImg"/>
+						<img src="Images/5050_yellow.png" class="lifelineYellowTreeImg"/>
+						<img src="Images/lifeline_used.png" class="lifelineUsedImg"/>
+					</div>
+				</div>
+				<div class="lifelineTreeHolderDiv pafLifeLine" style="top:107px;left:232px;">
+					<div class="lifelineTreeDiv" style="transform:perspective(0px);">
+						<img src="Images/paf.png" class="lifelineTreeImg"/>
+						<img src="Images/paf_yellow.png" class="lifelineYellowTreeImg"/>
+						<img src="Images/lifeline_used.png" class="lifelineUsedImg"/>
+					</div>
+				</div>
+				<div class="lifelineTreeHolderDiv ataLifeLine" style="top:107px;left:362px;">
+					<div class="lifelineTreeDiv" style="transform:perspective(0px);">
+						<img src="Images/ata.png" class="lifelineTreeImg"/>
+						<img src="Images/ata_yellow.png" class="lifelineYellowTreeImg"/>
+						<img src="Images/lifeline_used.png" class="lifelineUsedImg"/>
+					</div>
+				</div>
+				<div class="lifelineTreeHolderDiv stqLifeLine" style="top:107px;left:760px;opacity:0;">
+					<div class="lifelineTreeDiv" style="transform:perspective(0px);">
+						<img src="Images/stq.png" class="lifelineTreeImg"/>
+						<img src="Images/stq_yellow.png" class="lifelineYellowTreeImg"/>
+						<img src="Images/lifeline_used.png" class="lifelineUsedImg"/>
+					</div>
+				</div>
+
+				<table class="moneyTreeTable">
+					
+				</table>
+				<img src="Images/tree_seperator.png" />
+				<video loop muted src="Images/tree_background1.mp4" id="moneyTreeDiv">
+			</div>
+			
+			<!-- Life Lines Left Strap -->
+			<div class="lifeLinesLeftForStrapDiv">
+				<div class="lifelineStrapHolderDiv ffStrapLifeLine" style="top:0px;bottom:0px;left:400px;">
+					<div class="lifeLineForStrapDiv">
+						<img src="Images/5050.png" class="lifelineStrapImg"/>
+						<img src="Images/5050_yellow.png" class="lifelineYellowStrapImg"/>
+						<img src="Images/lifeline_used.png" class="lifelineUsedStrapImg"/>
+					</div>
+				</div>
+				<div class="lifelineStrapHolderDiv pafStrapLifeLine" style="top:0px;bottom:0px;left:745px;">
+					<div class="lifeLineForStrapDiv">
+						<img src="Images/paf.png" class="lifelineStrapImg"/>
+						<img src="Images/paf_yellow.png" class="lifelineYellowStrapImg"/>
+						<img src="Images/lifeline_used.png" class="lifelineUsedStrapImg"/>
+					</div>
+				</div>
+				<div class="lifelineStrapHolderDiv ataStrapLifeLine" style="top:0px;bottom:0px;left:1090px;">
+					<div class="lifeLineForStrapDiv">
+						<img src="Images/ata.png" class="lifelineStrapImg"/>
+						<img src="Images/ata_yellow.png" class="lifelineYellowStrapImg"/>
+						<img src="Images/lifeline_used.png" class="lifelineUsedStrapImg"/>
+					</div>
+				</div>
+				<div class="lifelineStrapHolderDiv stqStrapLifeLine" style="top:0px;bottom:0px;left:1870px;">
+					<div class="lifeLineForStrapDiv">
+						<img src="Images/stq.png" class="lifelineStrapImg"/>
+						<img src="Images/stq_yellow.png" class="lifelineYellowStrapImg"/>
+						<img src="Images/lifeline_used.png" class="lifelineUsedStrapImg"/>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Phone a Friend Clock Div -->
+			<div class="pafClock1Div">
+				<div class="pafClockTimeDiv">
+					<span>30</span>
+					<span>30</span>
+				</div>
+			</div>
+
+						<!-- Ask The Audience Graph Div -->
+			<div class="ataGraphDiv">
+				<div class="ataGraphBarDiv" id="graphBarA" style="left:25px;"></div>
+				<div class="ataGraphBarDiv" id="graphBarB" style="left:105px;"></div>
+				<div class="ataGraphBarDiv" id="graphBarC" style="left:185px;"></div>
+				<div class="ataGraphBarDiv" id="graphBarD" style="left:265px;"></div>
+				<div class="ataGraphPercentDiv" id="graphPercentA" style="left:10px;"></div>
+				<div class="ataGraphPercentDiv" id="graphPercentB" style="left:90px;"></div>
+				<div class="ataGraphPercentDiv" id="graphPercentC" style="left:170px;"></div>
+				<div class="ataGraphPercentDiv" id="graphPercentD" style="left:250px;"></div>
+			</div>
+			
+			<!-- Millionaire Winner Title Div -->
+			<div class="millionaireWinnerTitle1Div">
+				<div class="millionaireWinnerName1Div">Unnamed Player</div>
+				<div class="millionaireWinner1Div">MILLIONAIRE</div>
+			</div>
+			
+			<!-- Total Prize Money Div -->
+			<div class="totalPrizeMoney1Div">
+				<div class="totalPrize1Div">Total Winnings</div>
+				<div class="totalPrizeMoneyWon1Div">$0</div>
+			</div>
+
+			<p class="contestantNameForStrapP">BREAK</p>
+			<p class="contestantLocationForStrapP">BREAK</p>
+			
+			<div class="logoContainerDiv">
+				<div class="logoDiv">
+					<img src="Images/logo_beam_blue.png" style="top:-400px;bottom:-400px;left:-400px;right:-400px;" id="logoBeam1Img"/>
+					<img src="Images/logo_beam_blue.png" style="top:-400px;bottom:-400px;left:-400px;right:-400px;" id="logoBeam2Img"/>
+					<img src="Images/hostscreenlogo.png" />
+				</div>
+			</div>
+		</div>
+
+		<!-- Floating Sync Navigation Links -->
+		<div style="position: fixed; top: 10px; right: 10px; z-index: 999999; font-family: Arial, sans-serif;">
+			<div style="background: rgba(10, 10, 20, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 6px 10px; display: flex; gap: 8px; font-size: 11px; backdrop-filter: blur(4px);">
+				<a href="/controller.html" target="_blank" style="color: #00ffcc; text-decoration: none; font-weight: bold;">🎛️ Controller</a>
+				<span style="color: #555;">|</span>
+				<a href="/host.html" target="_blank" style="color: #4cd964; text-decoration: none; font-weight: bold;">🎙️ Host</a>
+				<span style="color: #555;">|</span>
+				<a href="/player.html" target="_blank" style="color: #ff9500; text-decoration: none; font-weight: bold;">🧑‍🎓 Player</a>
+				<span style="color: #555;">|</span>
+				<a href="/default.html" target="_blank" style="color: #af52de; text-decoration: none; font-weight: bold;">📺 Viewer</a>
+			</div>
+		</div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+Phím O: Phát nhạc mở đầu chương trình (Opening - main_theme.mp3).
+Phím C: Phát/Dừng nhạc và hiệu ứng chuyển cảnh quảng cáo (Commercial).
+Phím Phím mũi tên phải (➔): Tiến trình câu hỏi (Đọc câu hỏi ➔ Hiện lần lượt các đáp án ➔ Chốt/Mở đáp án đúng).
+Phím G: Kết thúc lượt chơi / Đặt lại game mới (Reset / Game Over).
+Phím Q: Tiếp tục trò chơi sau khi tạm dừng (Game Resume).
+Phím U: Hoàn tác thao tác trước đó (Undo).
+2. Phím chọn Đáp án & Dừng cuộc chơi
+Phím 1: Chốt đáp án A.
+Phím 2: Chốt đáp án B.
+Phím 3: Chốt đáp án C.
+Phím 4: Chốt đáp án D.
+Phím W: Người chơi quyết định Dừng cuộc chơi (Walk Away) để nhận tiền thưởng hiện tại.
+3. Phím Cây tiền thưởng (Money Tree) & Luật chơi
+Phím Phím mũi tên trái (⬅): Ẩn / Hiện bảng Cây tiền thưởng (Money Tree).
+Phím Phím mũi tên lên (⬆): Tăng mức câu hỏi hiện tại trên cây tiền.
+Phím Phím mũi tên xuống (⬇): Giảm mức câu hỏi hiện tại trên cây tiền.
+Phím E: Phát âm thanh / Hiệu ứng Giải thích luật chơi (Explain Rules).
+4. Phím Quyền Trợ Giúp (Lifelines)
+Phím F: Sử dụng quyền trợ giúp 50:50.
+Phím A: Sử dụng quyền trợ giúp Hỏi ý kiến khán giả (Ask the Audience - ATA).
+Phím P: Sử dụng quyền trợ giúp Gọi điện cho người thân (Phone a Friend - PAF).
+Phím S: Sử dụng quyền trợ giúp Đổi câu hỏi (Switch the Question - STQ).
+Phím H: Bật / Tắt đồng hồ đếm giờ cho cuộc gọi điện thoại.
+Phím L: Hiện/Ẩn thanh icon trạng thái các quyền trợ giúp.
+5. Phím Hiệu ứng & PING Biểu tượng
+Phím R: Nhấp nháy / Nhấn mạnh biểu tượng trợ giúp thứ 1 (LL1 PING).
+Phím T: Nhấp nháy biểu tượng trợ giúp thứ 2 (LL2 PING).
+Phím Y: Nhấp nháy biểu tượng trợ giúp thứ 3 (LL3 PING).
+Phím I: Nhấp nháy biểu tượng trợ giúp thứ 4 (LL4 PING).

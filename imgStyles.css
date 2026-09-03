@@ -1,0 +1,164 @@
+img {
+	position:absolute;
+	margin:auto;
+}
+
+.fastestFingerLeftGlowImg {
+	top:0px;
+	bottom:0px;
+	left:535px;
+	width:35px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.fastestFingerRightGlowImg {
+	top:0px;
+	bottom:0px;
+	right:535px;
+	width:35px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.fastestTimeCorrectFillImg {
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.fastestTreeAnswerDiagonalImg {
+	top:0px;
+	bottom:0px;
+	left:10px;
+	width:40px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.finalImg {
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.diagonalImg {
+	top:0px;
+	bottom:0px;
+	left:47px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.correctImg {
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.lifelineCenterImg {
+	width:150px;
+	height:122px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.lifelineTreeImg {
+	height:100px;
+}
+
+.lifelineTree1Img {
+	height:100px;
+}
+
+.lifelineStrapImg {
+	height:140px;
+}
+
+.lifelineForStrapImg {
+	height:140px;
+}
+
+.lifelineUsedForStrapImg{
+	height:140px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.lifelineYellowForStrapImg {
+	height:140px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.lifelineYellowTreeImg {
+	height:100px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.lifelineYellowStrapImg {
+	height:140px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.blankLifelineImg {
+	height:100px;
+}
+
+.blankLifelineFrameImg {
+	height:100px;
+}
+
+.blankLifelineFrameStrapImg {
+	height:140px;
+}
+
+.lifelineTreeImgStatic {
+	height:100px;
+}
+
+.lifelineUsedImg{
+	height:100px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.lifelineUsedStrapImg{
+	height:140px;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.moneyTreeDiagonalImg{
+	top:0px;
+	bottom:0px;
+	left:0px;
+	right:0px;
+	margin:auto;
+}
+
+.sideStrapGoldImg{
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
+
+.sideStrapGoldFillImg{
+	z-index:-1;
+	opacity:0;
+	-moz-opacity:0;
+	-webkit-opacity:0;
+}
