@@ -1,4 +1,4 @@
-﻿(function(gameVariables) {
+(function(gameVariables) {
 	/* Initialization Variables */
 	gameVariables.IsPAFLifeLineUsed = false;
 	gameVariables.IsFFLifeLineUsed = false;

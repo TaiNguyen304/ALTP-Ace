@@ -1,6 +1,9 @@
 <html>
 	<head>
-		<title>Who Wants To Be A Millionaire</title>
+		<title>Millionaire Game Suite</title>
+		<meta name="description" content="Who Wants to Be a Millionaire interactive game interface with host controller, player view, and video wall.">
+		<meta property="og:title" content="Millionaire Game Suite">
+		<meta property="og:description" content="Who Wants to Be a Millionaire interactive game interface with host controller, player view, and video wall.">
 		
 		<link rel="shortcut icon" href="Images/favicon.ico" type="image/x-icon">
 		<link rel="icon" href="Images/favicon.ico" type="image/x-icon">
@@ -18,6 +21,8 @@
 		<script type="text/javascript" src="Variables.js"></script>
 		<script type="text/javascript" src="CameraControl.js"></script>
 		<script type="text/javascript" src="AudioControl.js"></script>
+		<script type="text/javascript" src="disableDevTools.js"></script>
+		<script type="text/javascript" src="asymCrypto.js"></script>
 		<script type="text/javascript" src="socket.io/socket.io.js"></script>
 		<script type="text/javascript" src="FastestFingerControl.js"></script>
 		<script type="text/javascript" src="GeneralControl.js"></script>
@@ -495,16 +500,22 @@
 			</div>
 		</div>
 
-		<!-- Floating Sync Navigation Links -->
-		<div style="position: fixed; top: 10px; right: 10px; z-index: 999999; font-family: Arial, sans-serif;">
-			<div style="background: rgba(10, 10, 20, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 6px 10px; display: flex; gap: 8px; font-size: 11px; backdrop-filter: blur(4px);">
-				<a href="/controller.html" target="_blank" style="color: #00ffcc; text-decoration: none; font-weight: bold;">🎛️ Controller</a>
-				<span style="color: #555;">|</span>
-				<a href="/host.html" target="_blank" style="color: #4cd964; text-decoration: none; font-weight: bold;">🎙️ Host</a>
-				<span style="color: #555;">|</span>
-				<a href="/player.html" target="_blank" style="color: #ff9500; text-decoration: none; font-weight: bold;">🧑‍🎓 Player</a>
-				<span style="color: #555;">|</span>
-				<a href="/default.html" target="_blank" style="color: #af52de; text-decoration: none; font-weight: bold;">📺 Viewer</a>
+		<!-- Suite Navigation Hub -->
+		<div id="millionaire-suite-nav" style="position: fixed; top: 10px; right: 10px; z-index: 999999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+			<div style="background: rgba(10, 14, 26, 0.92); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; font-size: 11px; backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgba(0,0,0,0.6);">
+				<a href="/controller.html" style="color: #00ffcc; text-decoration: none; font-weight: 600; padding: 2px 4px;">🎛️ Controller</a>
+				<span style="color: #444;">|</span>
+				<a href="/host.html" style="color: #4cd964; text-decoration: none; font-weight: 600; padding: 2px 4px;">🎙️ Host</a>
+				<span style="color: #444;">|</span>
+				<a href="/player.html" style="color: #ff9500; text-decoration: none; font-weight: 600; padding: 2px 4px;">🧑‍🎓 Player</a>
+				<span style="color: #444;">|</span>
+				<a href="/default.html" style="color: #af52de; text-decoration: none; font-weight: 600; padding: 2px 4px;">📺 Viewer</a>
+				<span style="color: #444;">|</span>
+				<a href="/videowall.html" style="color: #5ac8fa; text-decoration: none; font-weight: 600; padding: 2px 4px;">🎬 Video Wall</a>
+				<span style="color: #444;">|</span>
+				<a href="/control-panel.html" style="color: #ff2d55; text-decoration: none; font-weight: 600; padding: 2px 4px;">📱 Remote</a>
+				<span style="color: #444;">|</span>
+				<a href="/question-editor.html" style="color: #ffd60a; text-decoration: none; font-weight: 600; padding: 2px 4px;">📝 Questions</a>
 			</div>
 		</div>
 	</body>

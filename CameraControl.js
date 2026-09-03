@@ -20,7 +20,7 @@ $(document).ready(function(){
 		};
 	  }, errorCallback);
 	} else {
-	  alert('getUserMedia() is not supported in your browser');
+	  console.warn('getUserMedia() is not supported in your browser');
 	}
 });
 

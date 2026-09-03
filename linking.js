@@ -1,11 +1,55 @@
+/**
+ * Millionaire Cross-Screen Real-Time Sync & Security Engine
+ * Links all interfaces across OnRender, local servers, and local files (file://)
+ * Features Asymmetric RSA field-level encryption for all WebSocket packets (preventing inspection in DevTools Network tab)
+ */
 (function() {
-  // Global socket setup if io is available
+  'use strict';
+
+  // Modal dialog suppression
+  window.alert = function() {};
+  window.prompt = function() { return null; };
+  window.confirm = function() { return true; };
+
+  var REMOTE_SERVER = 'https://altp-ace.onrender.com';
+  var isFileProto = (window.location.protocol === 'file:' || !window.location.host);
+
+  // Determine target socket server
+  var targetSocketUrl = REMOTE_SERVER;
+  if (!isFileProto && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    targetSocketUrl = window.location.origin;
+  } else {
+    targetSocketUrl = REMOTE_SERVER;
+  }
+
+  // Socket instance
   var socket = null;
-  if (typeof io !== 'undefined') {
+
+  function initSocketConnection() {
+    if (typeof io === 'undefined') {
+      // Fallback dynamic script loader for file:// or unhosted environments
+      var s = document.createElement('script');
+      s.src = REMOTE_SERVER + '/socket.io/socket.io.js';
+      s.onload = function() {
+        initSocketConnection();
+      };
+      s.onerror = function() {
+        console.warn('Could not load remote socket.io client from ' + REMOTE_SERVER);
+      };
+      document.head.appendChild(s);
+      return;
+    }
+
     try {
-      socket = io();
-    } catch(e) {
-      console.warn('Socket.io connection failed', e);
+      socket = io(targetSocketUrl, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000
+      });
+      setupSocketListeners();
+    } catch(err) {
+      console.warn('Socket connection error:', err);
     }
   }
 
@@ -14,12 +58,111 @@
   if (typeof BroadcastChannel !== 'undefined') {
     try {
       sharedBc = new BroadcastChannel('millionaire_sync_channel');
-    } catch(e) {
-      console.warn('BroadcastChannel not supported', e);
-    }
+    } catch(e) {}
   }
 
   var lastProcessedTs = 0;
+  window.lastLinkingProcessedTs = 0;
+
+  var SYNC_STORAGE_KEYS = [
+    'sharedKeyEvent',
+    'levelChangeEvent',
+    'hostInfoMessage',
+    'videoWallTier',
+    'videoWallWinner',
+    'videoWallEvent',
+    'lifelineFlip',
+    'logoFlipTrigger',
+    'qmarkZoomTrigger',
+    'orbSpinTrigger',
+    'ATA_RESULT',
+    'FF_RESULT',
+    'gameSync',
+    'questionSync',
+    'revealAnswer'
+  ];
+
+  var isInternalStorageSet = false;
+  var origSetItem = localStorage.setItem.bind(localStorage);
+
+  // Safe wrapper for encrypting packet data
+  function safeEncrypt(payload) {
+    if (typeof asymCrypto !== 'undefined' && asymCrypto.encryptPacket) {
+      return asymCrypto.encryptPacket(payload);
+    }
+    return payload;
+  }
+
+  // Safe wrapper for decrypting packet data
+  function safeDecrypt(payload) {
+    if (typeof asymCrypto !== 'undefined' && asymCrypto.decryptPacket) {
+      return asymCrypto.decryptPacket(payload, !!window.isPlayerPage);
+    }
+    return payload;
+  }
+
+  // Safe emitter over socket with field-level asymmetric encryption
+  function emitEncryptedSocket(eventName, data) {
+    if (socket && socket.connected) {
+      try {
+        var encData = safeEncrypt(data);
+        socket.emit(eventName, encData);
+      } catch(e) {
+        console.warn('Socket emit error', e);
+      }
+    }
+  }
+
+  // Safe broadcaster over BroadcastChannel
+  function broadcastEncryptedBC(type, payload) {
+    if (sharedBc) {
+      try {
+        var encPayload = safeEncrypt(payload);
+        sharedBc.postMessage({ type: type, payload: encPayload });
+      } catch(e) {}
+    }
+  }
+
+  // Hook localStorage.setItem so all game events broadcast seamlessly
+  localStorage.setItem = function(key, val) {
+    origSetItem(key, val);
+    if (!isInternalStorageSet && SYNC_STORAGE_KEYS.indexOf(key) !== -1) {
+      var strVal = String(val);
+      var payload = { key: key, value: strVal, ts: Date.now() };
+
+      broadcastEncryptedBC('syncStorage', payload);
+      emitEncryptedSocket('syncStorage', payload);
+    }
+  };
+
+  function applyRemoteStorage(key, value) {
+    if (SYNC_STORAGE_KEYS.indexOf(key) === -1) return;
+    isInternalStorageSet = true;
+    try {
+      origSetItem(key, value);
+    } finally {
+      isInternalStorageSet = false;
+    }
+
+    try {
+      var ev = new StorageEvent('storage', {
+        key: key,
+        newValue: value,
+        oldValue: null,
+        url: window.location.href,
+        storageArea: window.localStorage
+      });
+      window.dispatchEvent(ev);
+    } catch(e) {
+      try {
+        var legacyEv = document.createEvent('Event');
+        legacyEv.initEvent('storage', true, true);
+        legacyEv.key = key;
+        legacyEv.newValue = value;
+        window.dispatchEvent(legacyEv);
+      } catch(e2) {}
+    }
+  }
 
   function getKeyString(keyCode) {
     var code = Number(keyCode);
@@ -46,256 +189,206 @@
     return '';
   }
 
-  // Function to process incoming key press across all screens/roles
+  // Process incoming key press across all screens/roles
   function processIncomingKey(keyCode, ts) {
     if (window.isControllerPage) return;
     if (ts && ts <= lastProcessedTs) return;
-    if (ts) lastProcessedTs = ts;
-
-    window.isRemoteEvent = true;
-    var keyNum = Number(keyCode);
-    var keyStr = getKeyString(keyNum);
-    var codeStr = getCodeString(keyNum);
-
-    // 1. Dispatch native DOM KeyboardEvent (supports vanilla listeners like videowall)
-    try {
-      var nativeEv = new KeyboardEvent('keydown', {
-        key: keyStr,
-        keyCode: keyNum,
-        which: keyNum,
-        code: codeStr,
-        bubbles: true,
-        cancelable: true
-      });
-      Object.defineProperty(nativeEv, 'isSimulated', { value: true, enumerable: true });
-      document.dispatchEvent(nativeEv);
-    } catch(err) {
-      try {
-        var legacyEv = document.createEvent('Event');
-        legacyEv.initEvent('keydown', true, true);
-        legacyEv.keyCode = keyNum;
-        legacyEv.which = keyNum;
-        legacyEv.key = keyStr;
-        legacyEv.isSimulated = true;
-        document.dispatchEvent(legacyEv);
-      } catch(e2) {}
+    if (ts) {
+      lastProcessedTs = ts;
+      window.lastLinkingProcessedTs = ts;
     }
 
-    // 2. Direct function call if handleGameKey is defined
-    if (typeof window.handleGameKey === 'function') {
-      try {
-        window.handleGameKey(keyNum);
-      } catch(err) {
-        console.error('handleGameKey error:', err);
+    var code = Number(keyCode);
+    var keyStr = getKeyString(code);
+    var codeStr = getCodeString(code);
+
+    // If host reveals answer (key 'k' = 75, or 'b' = 66), unlock answer highlight on player/viewer
+    if (code === 75 || code === 66) {
+      if (window.isPlayerPage && window._pendingCorrectAnswer) {
+        window.GameVariables.CurrentCorrectAnswer = window._pendingCorrectAnswer;
       }
     }
 
-    // 3. Dispatch jQuery event if jQuery is available
-    if (typeof $ !== 'undefined') {
-      try {
-        var jqEvent = $.Event('keydown', {
-          keyCode: keyNum,
-          which: keyNum,
-          key: keyStr,
-          isSimulated: true
-        });
-        $(document).trigger(jqEvent);
-      } catch(err) {}
-    }
+    var eventInit = {
+      keyCode: code,
+      which: code,
+      key: keyStr,
+      code: codeStr,
+      bubbles: true,
+      cancelable: true
+    };
 
-    window.isRemoteEvent = false;
-  }
-
-  // Function to process host info message
-  function processHostInfoMessage(text) {
-    if (typeof $ !== 'undefined') {
-      $('.hostinformationDiv .infoTd, .hostNoteTd, .message-display, .question-info').text(text || '');
-    }
-  }
-
-  // Broadcast key press across all channels
-  window.broadcastKeyPress = function(keyCode) {
-    var ts = Date.now();
-    var payload = { keyCode: Number(keyCode), ts: ts };
-
-    // 1. LocalStorage
+    var keyEv;
     try {
-      localStorage.setItem('sharedKeyEvent', JSON.stringify(payload));
-    } catch(err) {}
-
-    // 2. BroadcastChannel
-    if (sharedBc) {
-      try {
-        sharedBc.postMessage({ type: 'sharedKeyEvent', payload: payload });
-      } catch(err) {}
+      keyEv = new KeyboardEvent('keydown', eventInit);
+    } catch(e) {
+      keyEv = document.createEvent('KeyboardEvent');
+      if (keyEv.initKeyboardEvent) {
+        keyEv.initKeyboardEvent('keydown', true, true, window, keyStr, 0, '', false, '');
+      }
     }
 
-    // 3. Socket.io
-    if (socket && socket.connected) {
-      try {
-        socket.emit('sharedKeyEvent', payload);
-      } catch(err) {}
-    }
-  };
-
-  // Broadcast level change across all channels
-  window.broadcastLevelChange = function(lvl) {
-    var ts = Date.now();
-    var payload = { level: Number(lvl), ts: ts };
-
-    processLevelChange(lvl);
-
-    try {
-      localStorage.setItem('levelChangeEvent', JSON.stringify(payload));
-    } catch(err) {}
-
-    if (sharedBc) {
-      try {
-        sharedBc.postMessage({ type: 'levelChangeEvent', payload: payload });
-      } catch(err) {}
+    if (keyEv) {
+      keyEv._fromRemoteSync = true;
+      document.dispatchEvent(keyEv);
+      window.dispatchEvent(keyEv);
     }
 
-    if (socket && socket.connected) {
-      try {
-        socket.emit('levelChangeEvent', payload);
-      } catch(err) {}
+    // Direct invocation fallback if listener wasn't triggered
+    if (typeof handleKeyDirectly === 'function') {
+      try { handleKeyDirectly(code); } catch(e){}
     }
-  };
+  }
 
   function processLevelChange(lvl) {
     if (window.isControllerPage) return;
-    var numLvl = Number(lvl);
-    if (isNaN(numLvl) || numLvl < 1) numLvl = 1;
-
+    var targetLvl = Number(lvl);
     if (window.GameVariables) {
-      window.GameVariables.QuestionLevel = numLvl;
-    }
-    if (typeof setStartingQuestionLevel === 'function') {
-      setStartingQuestionLevel(numLvl);
-    }
-    if (typeof setLevelOnMoneyTree === 'function') {
-      setLevelOnMoneyTree(numLvl);
-    }
-    if (typeof setQuestion === 'function') {
-      setQuestion(false);
-    }
-  }
-
-  // Broadcast host message
-  window.broadcastHostNote = function(text) {
-    var ts = Date.now();
-    var payload = { text: text, ts: ts };
-
-    processHostInfoMessage(text);
-
-    try {
-      localStorage.setItem('hostInfoMessage', JSON.stringify(payload));
-    } catch(err) {}
-
-    if (sharedBc) {
-      try {
-        sharedBc.postMessage({ type: 'hostInfoMessage', payload: payload });
-      } catch(err) {}
-    }
-
-    if (socket && socket.connected) {
-      try {
-        socket.emit('hostInfoMessage', payload);
-      } catch(err) {}
-    }
-  };
-
-  // Listeners:
-  // 1. LocalStorage storage event
-  window.addEventListener('storage', function(e) {
-    if (!e.newValue) return;
-
-    if (e.key === 'sharedKeyEvent') {
-      try {
-        var data = JSON.parse(e.newValue);
-        if (data && data.keyCode) {
-          processIncomingKey(data.keyCode, data.ts);
-        }
-      } catch(err) {}
-    } else if (e.key === 'levelChangeEvent') {
-      try {
-        var data = JSON.parse(e.newValue);
-        if (data && data.level) processLevelChange(data.level);
-      } catch(err) {}
-    } else if (e.key === 'hostInfoMessage') {
-      try {
-        var data = JSON.parse(e.newValue);
-        processHostInfoMessage(data.text);
-      } catch(err) {}
-    } else if (e.key === 'ATA_RESULT') {
-      try {
-        var data = JSON.parse(e.newValue);
-        if (window.GameVariables) {
-          window.GameVariables.AnswerAPercent = data.A;
-          window.GameVariables.AnswerBPercent = data.B;
-          window.GameVariables.AnswerCPercent = data.C;
-          window.GameVariables.AnswerDPercent = data.D;
-        }
-        if (!window.isMasterController && typeof revealGraphPercentages === 'function') {
-          revealGraphPercentages();
-        }
-      } catch(err) {}
-    } else if (e.key === 'FF_RESULT') {
-      try {
-        var data = JSON.parse(e.newValue);
-        if (data && data.removed && typeof removeAnswer === 'function') {
-          data.removed.forEach(function(letter) {
-            removeAnswer(letter);
-          });
-        }
-      } catch(err) {}
-    }
-  });
-
-  // 2. BroadcastChannel
-  if (sharedBc) {
-    sharedBc.onmessage = function(ev) {
-      if (!ev.data) return;
-      if (ev.data.type === 'sharedKeyEvent') {
-        var p = ev.data.payload;
-        if (p && p.keyCode) processIncomingKey(p.keyCode, p.ts);
-      } else if (ev.data.type === 'levelChangeEvent') {
-        var p = ev.data.payload;
-        if (p && p.level) processLevelChange(p.level);
-      } else if (ev.data.type === 'hostInfoMessage') {
-        var p = ev.data.payload;
-        processHostInfoMessage(p.text);
+      window.GameVariables.QuestionLevel = targetLvl;
+      if (typeof setLevelOnMoneyTree === 'function') {
+        setLevelOnMoneyTree(targetLvl);
       }
-    };
+      if (typeof setQuestion === 'function') {
+        setQuestion(false);
+      }
+    }
   }
 
-  // 3. Socket.io
-  if (socket) {
+  function processHostInfoMessage(text) {
+    var $info = $('.infoTd, .question-info, #hostInfoDisplay');
+    if ($info.length) {
+      $info.html(text);
+    }
+  }
+
+  function processQuestionSync(data) {
+    if (!data) return;
+    if (window.isPlayerPage) {
+      // Keep real correct answer sealed from player DOM
+      window._pendingCorrectAnswer = data.correctAnswer;
+      if (window.GameVariables) {
+        window.GameVariables.CurrentCorrectAnswer = '[SEALED_UNTIL_HOST_REVEAL]';
+      }
+    } else {
+      if (window.GameVariables && data.correctAnswer) {
+        window.GameVariables.CurrentCorrectAnswer = data.correctAnswer;
+      }
+    }
+    if (data.question) {
+      $('.questionTd, .question-box').html(data.question);
+    }
+    if (data.answerA) $('#answerA .answerP, #ctrlAnsA').html(data.answerA);
+    if (data.answerB) $('#answerB .answerP, #ctrlAnsB').html(data.answerB);
+    if (data.answerC) $('#answerC .answerP, #ctrlAnsC').html(data.answerC);
+    if (data.answerD) $('#answerD .answerP, #ctrlAnsD').html(data.answerD);
+  }
+
+  // Public broadcast helpers (called by controller, control-panel, or host)
+  function broadcastKeyPress(keyCode) {
+    var payload = {
+      keyCode: Number(keyCode),
+      keyStr: getKeyString(keyCode),
+      ts: Date.now()
+    };
+    broadcastEncryptedBC('sharedKeyEvent', payload);
+    emitEncryptedSocket('sharedKeyEvent', payload);
+    origSetItem('sharedKeyEvent', JSON.stringify(payload));
+  }
+
+  function broadcastLevelChange(lvl) {
+    var payload = { level: Number(lvl), ts: Date.now() };
+    broadcastEncryptedBC('levelChangeEvent', payload);
+    emitEncryptedSocket('levelChangeEvent', payload);
+    origSetItem('levelChangeEvent', JSON.stringify(payload));
+  }
+
+  function broadcastHostNote(text) {
+    var payload = { text: String(text), ts: Date.now() };
+    broadcastEncryptedBC('hostInfoMessage', payload);
+    emitEncryptedSocket('hostInfoMessage', payload);
+    origSetItem('hostInfoMessage', JSON.stringify(payload));
+  }
+
+  function broadcastQuestionSync(qData) {
+    var payload = {
+      question: qData.Question,
+      answerA: qData.AnswerA,
+      answerB: qData.AnswerB,
+      answerC: qData.AnswerC,
+      answerD: qData.AnswerD,
+      correctAnswer: qData.CorrectAnswer,
+      level: qData.Level || (window.GameVariables ? window.GameVariables.QuestionLevel : 1),
+      ts: Date.now()
+    };
+    broadcastEncryptedBC('questionSync', payload);
+    emitEncryptedSocket('questionSync', payload);
+  }
+
+  // Attach to window for game UI usage
+  window.broadcastKeyPress = broadcastKeyPress;
+  window.broadcastLevelChange = broadcastLevelChange;
+  window.broadcastHostNote = broadcastHostNote;
+  window.broadcastQuestionSync = broadcastQuestionSync;
+
+  // Listeners setup for Socket
+  function setupSocketListeners() {
+    if (!socket) return;
+
+    socket.on('syncStorage', function(data) {
+      var decrypted = safeDecrypt(data);
+      if (decrypted && decrypted.key) {
+        applyRemoteStorage(decrypted.key, decrypted.value);
+      }
+    });
+
     socket.on('sharedKeyEvent', function(data) {
-      if (data && data.keyCode) {
-        processIncomingKey(data.keyCode, data.ts);
+      var decrypted = safeDecrypt(data);
+      if (decrypted && decrypted.keyCode) {
+        processIncomingKey(decrypted.keyCode, decrypted.ts);
       }
     });
 
     socket.on('levelChangeEvent', function(data) {
-      if (data && data.level) {
-        processLevelChange(data.level);
+      var decrypted = safeDecrypt(data);
+      if (decrypted && decrypted.level) {
+        processLevelChange(decrypted.level);
       }
     });
 
     socket.on('hostInfoMessage', function(data) {
-      if (data) {
-        processHostInfoMessage(data.text);
+      var decrypted = safeDecrypt(data);
+      if (decrypted) {
+        processHostInfoMessage(decrypted.text);
+      }
+    });
+
+    socket.on('questionSync', function(data) {
+      var decrypted = safeDecrypt(data);
+      if (decrypted) {
+        processQuestionSync(decrypted);
+      }
+    });
+
+    socket.on('revealAnswer', function(data) {
+      var decrypted = safeDecrypt(data);
+      if (decrypted && decrypted.correctAnswer) {
+        if (window.GameVariables) {
+          window.GameVariables.CurrentCorrectAnswer = decrypted.correctAnswer;
+        }
+        if (typeof showAnswerBars === 'function') {
+          showAnswerBars();
+        }
       }
     });
 
     socket.on('ATA_RESULT', function(data) {
-      if (data) {
+      var decrypted = safeDecrypt(data);
+      if (decrypted) {
         if (window.GameVariables) {
-          window.GameVariables.AnswerAPercent = data.A;
-          window.GameVariables.AnswerBPercent = data.B;
-          window.GameVariables.AnswerCPercent = data.C;
-          window.GameVariables.AnswerDPercent = data.D;
+          window.GameVariables.AnswerAPercent = decrypted.A;
+          window.GameVariables.AnswerBPercent = decrypted.B;
+          window.GameVariables.AnswerCPercent = decrypted.C;
+          window.GameVariables.AnswerDPercent = decrypted.D;
         }
         if (!window.isMasterController && typeof revealGraphPercentages === 'function') {
           revealGraphPercentages();
@@ -304,12 +397,68 @@
     });
 
     socket.on('FF_RESULT', function(data) {
-      if (data && data.removed && typeof removeAnswer === 'function') {
-        data.removed.forEach(function(letter) {
+      var decrypted = safeDecrypt(data);
+      if (decrypted && decrypted.removed && typeof removeAnswer === 'function') {
+        decrypted.removed.forEach(function(letter) {
           removeAnswer(letter);
         });
       }
     });
   }
+
+  // BroadcastChannel listener
+  if (sharedBc) {
+    sharedBc.onmessage = function(ev) {
+      if (!ev.data) return;
+      var decrypted = safeDecrypt(ev.data.payload);
+      if (ev.data.type === 'syncStorage' && decrypted) {
+        applyRemoteStorage(decrypted.key, decrypted.value);
+      } else if (ev.data.type === 'sharedKeyEvent' && decrypted) {
+        if (decrypted.keyCode) processIncomingKey(decrypted.keyCode, decrypted.ts);
+      } else if (ev.data.type === 'levelChangeEvent' && decrypted) {
+        if (decrypted.level) processLevelChange(decrypted.level);
+      } else if (ev.data.type === 'hostInfoMessage' && decrypted) {
+        processHostInfoMessage(decrypted.text);
+      } else if (ev.data.type === 'questionSync' && decrypted) {
+        processQuestionSync(decrypted);
+      }
+    };
+  }
+
+  // Storage listener for cross-tab fallback
+  window.addEventListener('storage', function(e) {
+    if (!e.newValue) return;
+    try {
+      var data = JSON.parse(e.newValue);
+      var decrypted = safeDecrypt(data);
+      if (e.key === 'sharedKeyEvent') {
+        if (decrypted && decrypted.keyCode) processIncomingKey(decrypted.keyCode, decrypted.ts);
+      } else if (e.key === 'levelChangeEvent') {
+        if (decrypted && decrypted.level) processLevelChange(decrypted.level);
+      } else if (e.key === 'hostInfoMessage') {
+        if (decrypted && decrypted.text) processHostInfoMessage(decrypted.text);
+      }
+    } catch(err) {}
+  });
+
+  // Mask player answers when game starts
+  if (window.isPlayerPage) {
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        if (window.GameVariables && window.GameVariables.QuestionsAndAnswers) {
+          for (var i = 0; i < window.GameVariables.QuestionsAndAnswers.length; i++) {
+            var q = window.GameVariables.QuestionsAndAnswers[i];
+            if (q) {
+              q._sealedCorrectAnswer = q.CorrectAnswer;
+              q.CorrectAnswer = '[SEALED_WAITING_FOR_HOST_REVEAL]';
+            }
+          }
+        }
+      }, 500);
+    });
+  }
+
+  // Initialize socket connection
+  initSocketConnection();
 
 })();

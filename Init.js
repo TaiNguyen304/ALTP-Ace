@@ -237,10 +237,10 @@ $.ajax({
 		},
 		error: function(e){
 			if(e.message === null || e.message === undefined){
-				alert(e.Message);
+				console.error(e.Message);
 			}
 			else{
-				alert(e.message);
+				console.error(e.message);
 			}
 		}
 	});*/

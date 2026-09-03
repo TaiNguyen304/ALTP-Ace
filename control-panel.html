@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hot Seat — Control Panel</title>
 <script>window.isControllerPage = true;</script>
+<script src="disableDevTools.js"></script>
+<script src="asymCrypto.js"></script>
 <script src="socket.io/socket.io.js"></script>
 <script src="linking.js"></script>
 <style>
@@ -25,7 +27,7 @@
     --mono: 'Courier New', ui-monospace, monospace;
   }
 
-  *{ box-sizing:border-box; }
+  *{ box-sizing:border-box; font-weight: bold !important; }
 
   html,body{
     margin:0; padding:0;
@@ -296,6 +298,23 @@
 </head>
 <body>
 <div class="wrap">
+
+  <!-- Suite Navigation Hub -->
+  <div style="background: rgba(10, 14, 26, 0.92); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; font-size: 11px; margin-bottom: 12px;">
+    <a href="/controller.html" style="color: #00ffcc; text-decoration: none; font-weight: 600; padding: 2px 4px;">🎛️ Controller</a>
+    <span style="color: #444;">|</span>
+    <a href="/host.html" style="color: #4cd964; text-decoration: none; font-weight: 600; padding: 2px 4px;">🎙️ Host</a>
+    <span style="color: #444;">|</span>
+    <a href="/player.html" style="color: #ff9500; text-decoration: none; font-weight: 600; padding: 2px 4px;">🧑‍🎓 Player</a>
+    <span style="color: #444;">|</span>
+    <a href="/default.html" style="color: #af52de; text-decoration: none; font-weight: 600; padding: 2px 4px;">📺 Viewer</a>
+    <span style="color: #444;">|</span>
+    <a href="/videowall.html" style="color: #5ac8fa; text-decoration: none; font-weight: 600; padding: 2px 4px;">🎬 Video Wall</a>
+    <span style="color: #444;">|</span>
+    <a href="/control-panel.html" style="color: #ff2d55; text-decoration: none; font-weight: 600; padding: 2px 4px;">📱 Remote</a>
+    <span style="color: #444;">|</span>
+    <a href="/question-editor.html" style="color: #ffd60a; text-decoration: none; font-weight: 600; padding: 2px 4px;">📝 Questions</a>
+  </div>
 
   <header>
     <div class="brand">

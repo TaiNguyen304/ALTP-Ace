@@ -79,9 +79,18 @@ window.handleGameKey = function(keyCode) {
 $(document).ready(function(){
 	$(document).on('keydown', function(e)
 	{
+		if ($(e.target).is('input, textarea, select')) {
+			return;
+		}
 		var isSimulated = !!(e.isSimulated || (e.originalEvent && e.originalEvent.isSimulated) || window.isRemoteEvent);
+		var code = e.keyCode || e.which;
 		if (isSimulated) {
-			window.handleGameKey(e.keyCode || e.which);
+			window.handleGameKey(code);
+		} else {
+			if (typeof broadcastKeyPress === 'function') {
+				broadcastKeyPress(code);
+			}
+			window.handleGameKey(code);
 		}
 	});
 });
